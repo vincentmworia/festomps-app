@@ -1,6 +1,11 @@
+import 'package:festomps/screens/home_screen.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:local_auth/local_auth.dart';
+import 'package:provider/provider.dart';
 
+import '../providers/firebase_provider.dart';
+import '../global_data.dart';
 import './home_screen.dart';
 import '../enum.dart';
 import '../main.dart';
@@ -11,6 +16,7 @@ class LoginScreen extends StatefulWidget {
   const LoginScreen({
     Key? key,
   }) : super(key: key);
+  static const routeName = '/login_screen';
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
@@ -38,13 +44,38 @@ class _LoginScreenState extends State<LoginScreen> {
   final _passwordFocusNode = FocusNode();
   final _confirmPasswordFocusNode = FocusNode();
 
+  LocalAuthentication authentication = LocalAuthentication();
+
+  Future<void> _getAuth() async {
+    bool isAuth = false;
+    try {
+      isAuth = await authentication.authenticate(
+        localizedReason: 'Scan your fingeprint to access the app',
+        options: const AuthenticationOptions(
+          biometricOnly: false, // todo Just use fingerprint if set this to true
+          useErrorDialogs: true,
+          stickyAuth: true,
+        ),
+      );
+      if (kDebugMode) {
+        print(isAuth);
+      }
+      if (isAuth) {
+        Future.delayed(Duration.zero).then((_) =>
+            Navigator.pushReplacementNamed(context, HomeScreen.routeName));
+      }
+    } on Exception catch (e) {
+      if (kDebugMode) {
+        print(e);
+      }
+    }
+  }
+
   @override
   void initState() {
     super.initState();
     _authenticationMode = AuthenticationMode.login;
   }
-
-
 
   @override
   void dispose() {
@@ -64,6 +95,10 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> _submit() async {
+    Future.delayed(Duration.zero).then((value) {
+      _isLoading = false;
+      Navigator.pushReplacementNamed(context, HomeScreen.routeName);
+    });
     FocusScope.of(context).unfocus();
     if (_formKey.currentState == null || !(_formKey.currentState!.validate())) {
       return;
@@ -89,11 +124,6 @@ class _LoginScreenState extends State<LoginScreen> {
     if (_authenticationMode == AuthenticationMode.login) {
       _emailController.text = '';
       _passwordController.text = '';
-      Future.delayed(const Duration(seconds: 5)).then((value) {
-        _isLoading=false;
-        Navigator.pushReplacement(
-            context, MaterialPageRoute(builder: (_) => const HomeScreen()));
-      });
     } else {
       Future.delayed(const Duration(seconds: 5)).then((value) => setState(() {
             _emailController.text = '';
@@ -107,34 +137,55 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
+  bool _loginWithFingerprint = false;
+  bool _hasBioSensor = false;
+
+  Future<bool> _checkBiometrics() async {
+    try {
+      _hasBioSensor = await authentication.canCheckBiometrics;
+    } on Exception {
+      _hasBioSensor = false;
+    }
+    return _hasBioSensor;
+  }
   @override
   Widget build(BuildContext context) {
     final deviceHeight =
         MediaQuery.of(context).size.height - MediaQuery.of(context).padding.top;
+
+    final fingerprintUseAuthorized =
+        Provider.of<FirebaseUserData>(context, listen: false).switchValue;
+
     return SafeArea(
       child: Scaffold(
         backgroundColor: Colors.white,
         body: SingleChildScrollView(
           physics: const BouncingScrollPhysics(
               parent: AlwaysScrollableScrollPhysics()),
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 300),
-            height: deviceHeight *
-                (_authenticationMode == AuthenticationMode.signup ? 1.1 : 1),
+          child: SizedBox(
+            height: deviceHeight,
             child: Form(
               key: _formKey,
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: <Widget>[
-                  ClipPath(
-                    clipper: CurveClipper(),
-                    child: Image(
-                      image: const AssetImage(MyApp.appBackgroundImgUrl),
-                      height: deviceHeight * 0.45,
-                      width: double.infinity,
-                      fit: BoxFit.cover,
+                  AnimatedContainer(
+                    duration: const Duration(milliseconds: 300),
+                    height: deviceHeight *
+                        (_authenticationMode == AuthenticationMode.signup
+                            ? 0.3
+                            : 0.45),
+                    child: ClipPath(
+                      clipper: CurveClipper(),
+                      child: const Image(
+                        image: AssetImage(MyApp.appBackgroundImgUrl),
+                        width: double.infinity,
+                        fit: BoxFit.cover,
+                      ),
                     ),
                   ),
+                  if ((_authenticationMode == AuthenticationMode.login))
+                    SizedBox(height: deviceHeight * 0.05),
                   InputField(
                     key: const ValueKey('email'),
                     controller: _emailController,
@@ -184,6 +235,16 @@ class _LoginScreenState extends State<LoginScreen> {
                         if (value == null || value.isEmpty) {
                           return 'Enter First Name';
                         }
+                        var isCaps = false;
+                        for (String val in alphabet) {
+                          if (val.toUpperCase() == value[0]) {
+                            isCaps = true;
+                            break;
+                          }
+                        }
+                        if (!isCaps) {
+                          return 'Name must start with a capital letter';
+                        }
                         return null;
                       },
                       onSaved: (value) {
@@ -210,6 +271,18 @@ class _LoginScreenState extends State<LoginScreen> {
                             value.length < 4) {
                           return 'Enter Last Name';
                         }
+
+                        var isCaps = false;
+                        for (String val in alphabet) {
+                          if (val.toUpperCase() == value[0]) {
+                            isCaps = true;
+                            break;
+                          }
+                        }
+                        if (!isCaps) {
+                          return 'Name must start with a capital letter';
+                        }
+
                         return null;
                       },
                       onSaved: (value) {
@@ -241,6 +314,14 @@ class _LoginScreenState extends State<LoginScreen> {
                       }
                       if (value.length < 7) {
                         return 'Password must be at least 7 characters long';
+                      }
+                      if (_userPassword.toLowerCase().trim() ==
+                              _userFirstName.toLowerCase().trim() ||
+                          _userPassword.toLowerCase().trim() ==
+                              _userLastName.toLowerCase().trim() ||
+                          _userPassword.toLowerCase().trim() ==
+                              _userEmail.toLowerCase().trim()) {
+                        return 'Password must be different from email and name';
                       }
                       return null;
                     },
@@ -285,10 +366,45 @@ class _LoginScreenState extends State<LoginScreen> {
                         });
                       },
                       child: SizedBox(
-                        height: MediaQuery.of(context).size.height * 0.25,
+                        height: MediaQuery.of(context).size.height * 0.35,
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: [
+                            if (
+                                _authenticationMode == AuthenticationMode.login)
+                              FutureBuilder(
+                                  future: _checkBiometrics(),
+                                  builder: (context, snap) {
+                                    if(snap.connectionState==ConnectionState.waiting){
+                                      print('wait');
+                                      return const Center();
+                                    }
+                                  var  deviceHasBiometrics =snap.data as bool;
+                                    print('Finger auth: $fingerprintUseAuthorized');
+                                    print('device auth: $deviceHasBiometrics');
+
+                                    _loginWithFingerprint =
+                                        fingerprintUseAuthorized &&
+                                            deviceHasBiometrics;
+
+                                    print(_loginWithFingerprint);
+                                    if(!_loginWithFingerprint){
+                                      return const Center();
+                                    }
+                                    return Padding(
+                                      padding: const EdgeInsets.all(4.0),
+                                      child: IconButton(
+                                        onPressed: _getAuth,
+                                        iconSize:
+                                            MediaQuery.of(context).size.height *
+                                                0.06,
+                                        icon: const Icon(
+                                          Icons.fingerprint,
+                                          color: MyApp.appSecondaryColor,
+                                        ),
+                                      ),
+                                    );
+                                  }),
                             Custom.elevatedButton(
                               context: context,
                               title: _isLoading

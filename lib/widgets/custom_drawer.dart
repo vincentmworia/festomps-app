@@ -1,4 +1,7 @@
 import 'package:festomps/main.dart';
+import 'package:festomps/screens/about_screen.dart';
+import 'package:festomps/screens/home_screen.dart';
+import 'package:festomps/screens/profile_screen.dart';
 import 'package:flutter/material.dart';
 
 import '../screens/login_screen.dart';
@@ -22,10 +25,27 @@ class CustomDrawer extends StatelessWidget {
           ),
           onTap: onTap,
         ),
-       const Divider(),
+        const Divider(),
       ],
     );
   }
+
+
+  static CircleAvatar circleAvatar() => const CircleAvatar(
+        backgroundColor: MyApp.appSecondaryColor,
+        child: Center(
+          child: Padding(
+            padding: EdgeInsets.all(8.0),
+            child: Text(
+              'V\tM',
+              style: TextStyle(
+                  fontSize: 30.0,
+                  fontWeight: FontWeight.bold,
+                  color: MyApp.appPrimaryColor),
+            ),
+          ),
+        ),
+      );
 
   @override
   Widget build(BuildContext context) {
@@ -33,25 +53,35 @@ class CustomDrawer extends StatelessWidget {
       child: SingleChildScrollView(
         child: Column(
           children: <Widget>[
-            const UserAccountsDrawerHeader(
-              currentAccountPicture: CircleAvatar(
-                backgroundColor: MyApp.appSecondaryColor,
-              ),
-              accountName: Text("Vincent Mworia"),
-              accountEmail: Text("mworiavin@gmail.com"),
+            UserAccountsDrawerHeader(
+              currentAccountPicture: circleAvatar(),
+              //todo share with profile
+              accountName: const Text("Vincent Mworia"),
+              accountEmail: const Text("mworiavin@gmail.com"),
             ),
             _buildDrawer(
-              icon:Custom.icon(Icons.home, MyApp.appPrimaryColor),
+              icon: Custom.icon(Icons.home, MyApp.appPrimaryColor),
               title: 'HOME',
-              onTap: () => Navigator.pushReplacement(context,
-                  MaterialPageRoute(builder: (_) => const LoginScreen())),
+              onTap: () =>
+                  Navigator.pushReplacementNamed(context, HomeScreen.routeName),
             ),
             _buildDrawer(
-              icon:Custom.icon(Icons.logout, MyApp.appPrimaryColor),
+              icon: Custom.icon(Icons.account_circle, MyApp.appPrimaryColor),
+              title: 'Your Profile',
+              onTap: () => Navigator.pushReplacementNamed(
+                  context, ProfileScreen.routeName),
+            ),
+            _buildDrawer(
+              icon: Custom.icon(Icons.info, MyApp.appPrimaryColor),
+              title: 'About',
+              onTap: () => Navigator.pushReplacementNamed(
+                  context, AboutScreen.routeName),
+            ),
+            _buildDrawer(
+              icon: Custom.icon(Icons.logout, MyApp.appPrimaryColor),
               title: 'Logout',
-              onTap: () {
-                //todo
-              },
+              onTap: () => Navigator.pushReplacementNamed(
+                  context, LoginScreen.routeName),
             ),
           ],
         ),

@@ -5,12 +5,31 @@ import '../main.dart';
 class Custom {
   static String loadingText = ' ';
 
+  static Future<dynamic> showCustomDialog(
+      BuildContext context, String message) async {
+    return await showDialog(
+        context: context,
+        builder: (ctx) => AlertDialog(
+              // title: const Text(''),
+              content: Text(
+                message,
+              ),
+              actions: [
+                TextButton(
+                    onPressed: () {
+                      Navigator.pop(ctx);
+                    },
+                    child: const Text('Okay'))
+              ],
+            ));
+  }
+
   static Widget normalTextOrange(String title) => Text(
         title,
         style: const TextStyle(
           color: MyApp.appSecondaryColor,
           // letterSpacing: 1.5,
-          fontSize: 18.0,
+          fontSize: 20.0,
         ),
       );
 
@@ -28,7 +47,7 @@ class Custom {
         style: const TextStyle(
           color: MyApp.appSecondaryColor,
           letterSpacing: 5,
-          fontSize: 30.0,
+          fontSize: 25.0,
           fontWeight: FontWeight.bold,
         ),
       );
@@ -74,6 +93,7 @@ class InputField extends StatefulWidget {
     this.textInputAction,
     this.validator,
     this.onSaved,
+    this.initialValue,
   }) : super(key: key);
   final TextEditingController controller;
   final String hintText;
@@ -87,6 +107,7 @@ class InputField extends StatefulWidget {
   final TextInputAction? textInputAction;
   final String? Function(String?)? validator;
   final void Function(String?)? onSaved;
+  final String? initialValue;
 
   @override
   State<InputField> createState() => _InputFieldState();
@@ -98,49 +119,55 @@ class _InputFieldState extends State<InputField> {
   @override
   void initState() {
     super.initState();
-    obscureText =
-        (widget.hintText == 'Password' || widget.hintText == 'Confirm Password')
-            ? true
-            : false;
+    obscureText = (widget.hintText == 'Password' ||
+            widget.hintText == 'Old Password' ||
+            widget.hintText == 'Confirm Password')
+        ? true
+        : false;
   }
 
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
-      child: TextFormField(
-        key: widget.key,
-        controller: widget.controller,
-        keyboardType: TextInputType.emailAddress,
-        focusNode: widget.focusNode,
-        autocorrect: widget.autoCorrect,
-        enableSuggestions: widget.enableSuggestions,
-        textCapitalization:
-            widget.textCapitalization ?? TextCapitalization.none,
-        obscureText: obscureText,
-        onFieldSubmitted: widget.onFieldSubmitted,
-        textInputAction: widget.textInputAction,
-        decoration: InputDecoration(
-          contentPadding: const EdgeInsets.symmetric(vertical: 15.0),
-          fillColor: Colors.white,
-          filled: true,
-          hintText: widget.hintText,
-          prefixIcon: Custom.icon(widget.icon, MyApp.appPrimaryColor),
-          suffixIcon: (widget.hintText == 'Password' ||
-                  widget.hintText == 'Confirm Password')
-              ? GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      obscureText = !obscureText;
-                    });
-                  },
-                  child: obscureText
-                      ? Custom.icon(Icons.visibility_off, Colors.grey)
-                      : Custom.icon(Icons.visibility, MyApp.appPrimaryColor))
-              : null,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(15.0),
+        child: TextFormField(
+          initialValue: widget.initialValue,
+          key: widget.key,
+          controller: widget.controller,
+          keyboardType: TextInputType.emailAddress,
+          focusNode: widget.focusNode,
+          autocorrect: widget.autoCorrect,
+          enableSuggestions: widget.enableSuggestions,
+          textCapitalization:
+              widget.textCapitalization ?? TextCapitalization.none,
+          obscureText: obscureText,
+          onFieldSubmitted: widget.onFieldSubmitted,
+          textInputAction: widget.textInputAction,
+          decoration: InputDecoration(
+            contentPadding: const EdgeInsets.symmetric(vertical: 15.0),
+            fillColor: Colors.white,
+            filled: true,
+            hintText: widget.hintText,
+            prefixIcon: Custom.icon(widget.icon, MyApp.appPrimaryColor),
+            suffixIcon: (widget.hintText == 'Password' ||
+                    widget.hintText == 'Old Password' ||
+                    widget.hintText == 'Confirm Password')
+                ? GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        obscureText = !obscureText;
+                      });
+                    },
+                    child: obscureText
+                        ? Custom.icon(Icons.visibility_off, Colors.grey)
+                        : Custom.icon(Icons.visibility, MyApp.appPrimaryColor))
+                : null,
+          ),
+          validator: widget.validator,
+          onSaved: widget.onSaved,
         ),
-        validator: widget.validator,
-        onSaved: widget.onSaved,
       ),
     );
   }
