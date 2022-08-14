@@ -107,7 +107,8 @@ class FirebaseAuthenticationHandler with ChangeNotifier {
     allUsersData.forEach((userId, userData) {
       User user = User.fromMap(userData as Map<String, dynamic>);
       if (userId == signInData.localId) {
-        Provider.of<FirebaseUserData>(context).setLoggedInUser(user);
+        Provider.of<FirebaseUserData>(context, listen: false)
+            .setLoggedInUser(user);
       } else {
         otherUsers.add(user);
       }
