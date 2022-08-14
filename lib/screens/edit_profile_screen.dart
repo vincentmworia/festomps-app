@@ -1,24 +1,23 @@
-import 'package:festomps/main.dart';
-import 'package:festomps/screens/home_screen.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../main.dart';
 import '../global_data.dart';
 import '../models/user.dart';
-import '../providers/firebase_provider.dart';
-import 'custom_widgets.dart';
+import '../providers/firebase_user_data.dart';
+import '../widgets/custom_widgets.dart';
 
-class EditProfileView extends StatefulWidget {
-  const EditProfileView(this.user, {Key? key}) : super(key: key);
+class EditProfileScreen extends StatefulWidget {
+  const EditProfileScreen(this.user, {Key? key}) : super(key: key);
 
   final User user;
 
   @override
-  State<EditProfileView> createState() => _EditProfileViewState();
+  State<EditProfileScreen> createState() => _EditProfileScreenState();
 }
 
-class _EditProfileViewState extends State<EditProfileView> {
+class _EditProfileScreenState extends State<EditProfileScreen> {
   final _formKey = GlobalKey<FormState>();
   var _isLoading = false;
   var _userEmail = '';
@@ -66,10 +65,11 @@ class _EditProfileViewState extends State<EditProfileView> {
     }
     _formKey.currentState!.save();
 
+    // todo submit to firebase
     _userEmail = _userEmail.trim();
     _userFirstName = _userFirstName.trim();
     _userLastName = _userLastName.trim();
-    _userPassword = _userPassword.trim();
+    _userPassword = _userPassword;
 
     setState(() {
       _isLoading = true;
@@ -79,14 +79,12 @@ class _EditProfileViewState extends State<EditProfileView> {
     Email:\t$_userEmail
     Firstname:\t$_userFirstName
     Lastname:\t$_userLastName
-    password:\t$_userPassword
+    new password:\t$_userPassword
     ''');
     }
     await Custom.showCustomDialog(context, 'UPDATE SUCCESSFUL');
 
-    setState(() {
-      _isLoading = false;
-    });
+    Future.delayed(Duration.zero).then((_) => Navigator.pop(context));
   }
 
   @override
@@ -113,6 +111,7 @@ class _EditProfileViewState extends State<EditProfileView> {
   @override
   Widget build(BuildContext context) {
     final user = Provider.of<FirebaseUserData>(context);
+    // todo insert the new user and update the data
     final deviceHeight =
         MediaQuery.of(context).size.height - MediaQuery.of(context).padding.top;
 
@@ -286,9 +285,9 @@ class _EditProfileViewState extends State<EditProfileView> {
                                   },
                                 ),
                                 InputField(
-                                  key: const ValueKey('password'),
+                                  key: const ValueKey('newPassword'),
                                   controller: _passwordController,
-                                  hintText: 'Password',
+                                  hintText: 'New Password',
                                   icon: Icons.lock,
                                   obscureText: true,
                                   focusNode: _passwordFocusNode,
@@ -306,16 +305,30 @@ class _EditProfileViewState extends State<EditProfileView> {
                                     if (value.length < 7) {
                                       return 'Password must be at least 7 characters long';
                                     }
-                                    if (_userPassword.toLowerCase().trim() ==
-                                            _userFirstName
+                                    if (_passwordController.text
+                                                .toLowerCase()
+                                                .trim() ==
+                                            _firstNameController.text
                                                 .toLowerCase()
                                                 .trim() ||
-                                        _userPassword.toLowerCase().trim() ==
-                                            _userLastName
+                                        _passwordController.text
+                                                .toLowerCase()
+                                                .trim() ==
+                                            '${_firstNameController.text}${_lastNameController.text}'
                                                 .toLowerCase()
                                                 .trim() ||
-                                        _userPassword.toLowerCase().trim() ==
-                                            _userEmail.toLowerCase().trim()) {
+                                        _passwordController.text
+                                                .toLowerCase()
+                                                .trim() ==
+                                            _lastNameController.text
+                                                .toLowerCase()
+                                                .trim() ||
+                                        _passwordController.text
+                                                .toLowerCase()
+                                                .trim() ==
+                                            _emailController.text
+                                                .toLowerCase()
+                                                .trim()) {
                                       return 'Password must be different from email and name';
                                     }
                                     return null;

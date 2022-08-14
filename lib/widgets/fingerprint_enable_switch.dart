@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import './custom_widgets.dart';
 import '../main.dart';
-import '../providers/firebase_provider.dart';
-import 'custom_widgets.dart';
+import '../providers/firebase_user_data.dart';
 
 class FingerprintEnableSwitch extends StatefulWidget {
   const FingerprintEnableSwitch({Key? key}) : super(key: key);

@@ -1,9 +1,8 @@
-import 'package:festomps/main.dart';
-import 'package:festomps/screens/home_screen.dart';
 import 'package:flutter/material.dart';
 
+import '../main.dart';
 import '../widgets/custom_drawer.dart';
-import '../widgets/custom_widgets.dart';
+import './home_screen.dart';
 
 class AboutScreen extends StatelessWidget {
   const AboutScreen({Key? key}) : super(key: key);

@@ -1,6 +1,6 @@
-import 'package:festomps/main.dart';
 import 'package:flutter/material.dart';
 
+import '../main.dart';
 import '../widgets/custom_widgets.dart';
 import '../widgets/custom_drawer.dart';
 
@@ -26,7 +26,7 @@ class HomeScreen extends StatelessWidget {
         appBar:appBar(scaffoldKey,'FESTO MPS'),
         drawer: const CustomDrawer(),
         body: const Center(
-          child: Text('HOME SCREEN'),
+          child: Text('TODO control and monitor'),
         ),
       ),
     );

@@ -3,28 +3,30 @@ import 'package:flutter/material.dart';
 import '../main.dart';
 
 class Custom {
-  static String loadingText = ' ';
+  static String loadingText = '...';
 
-  static Future<dynamic> showCustomDialog(
-      BuildContext context, String message) async {
+  static Future<dynamic> showCustomDialog(BuildContext context,
+      String message) async {
     return await showDialog(
         context: context,
-        builder: (ctx) => AlertDialog(
+        builder: (ctx) =>
+            AlertDialog(
               // title: const Text(''),
-              content: Text(
-                message,
-              ),
+              content: normalText(message),
               actions: [
-                TextButton(
-                    onPressed: () {
-                      Navigator.pop(ctx);
-                    },
-                    child: const Text('Okay'))
+                Center(
+                  child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                      child: const Text('Okay')),
+                )
               ],
             ));
   }
 
-  static Widget normalTextOrange(String title) => Text(
+  static Widget normalTextOrange(String title) =>
+      Text(
         title,
         style: const TextStyle(
           color: MyApp.appSecondaryColor,
@@ -33,7 +35,8 @@ class Custom {
         ),
       );
 
-  static Widget normalText(String title) => Text(
+  static Widget normalText(String title) =>
+      Text(
         title,
         style: const TextStyle(
           color: MyApp.appSecondaryColor2,
@@ -42,7 +45,8 @@ class Custom {
         ),
       );
 
-  static Widget titleText(String title) => Text(
+  static Widget titleText(String title) =>
+      Text(
         title,
         style: const TextStyle(
           color: MyApp.appSecondaryColor,
@@ -52,7 +56,8 @@ class Custom {
         ),
       );
 
-  static Widget icon(IconData icon, Color color) => Icon(
+  static Widget icon(IconData icon, Color color) =>
+      Icon(
         icon,
         size: 30.0,
         color: color,
@@ -63,7 +68,10 @@ class Custom {
     required String title,
     required void Function()? onPress,
   }) {
-    final Size bnSize = Size(MediaQuery.of(context).size.width / 1.5, 60);
+    final Size bnSize = Size(MediaQuery
+        .of(context)
+        .size
+        .width / 1.5, 60);
     return ElevatedButton(
         style: ElevatedButton.styleFrom(
             minimumSize: bnSize,
@@ -119,9 +127,10 @@ class _InputFieldState extends State<InputField> {
   @override
   void initState() {
     super.initState();
-    obscureText = (widget.hintText == 'Password' ||
-            widget.hintText == 'Old Password' ||
-            widget.hintText == 'Confirm Password')
+    obscureText =
+    (widget.hintText == 'Password' || widget.hintText == 'New Password' ||
+    widget.hintText == 'Old Password' ||
+    widget.hintText == 'Confirm Password')
         ? true
         : false;
   }
@@ -141,7 +150,7 @@ class _InputFieldState extends State<InputField> {
           autocorrect: widget.autoCorrect,
           enableSuggestions: widget.enableSuggestions,
           textCapitalization:
-              widget.textCapitalization ?? TextCapitalization.none,
+          widget.textCapitalization ?? TextCapitalization.none,
           obscureText: obscureText,
           onFieldSubmitted: widget.onFieldSubmitted,
           textInputAction: widget.textInputAction,
@@ -152,17 +161,18 @@ class _InputFieldState extends State<InputField> {
             hintText: widget.hintText,
             prefixIcon: Custom.icon(widget.icon, MyApp.appPrimaryColor),
             suffixIcon: (widget.hintText == 'Password' ||
-                    widget.hintText == 'Old Password' ||
-                    widget.hintText == 'Confirm Password')
+                widget.hintText == 'Old Password' ||
+                widget.hintText == 'New Password' ||
+                widget.hintText == 'Confirm Password')
                 ? GestureDetector(
-                    onTap: () {
-                      setState(() {
-                        obscureText = !obscureText;
-                      });
-                    },
-                    child: obscureText
-                        ? Custom.icon(Icons.visibility_off, Colors.grey)
-                        : Custom.icon(Icons.visibility, MyApp.appPrimaryColor))
+                onTap: () {
+                  setState(() {
+                    obscureText = !obscureText;
+                  });
+                },
+                child: obscureText
+                    ? Custom.icon(Icons.visibility_off, Colors.grey)
+                    : Custom.icon(Icons.visibility, MyApp.appPrimaryColor))
                 : null,
           ),
           validator: widget.validator,

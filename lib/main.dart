@@ -1,11 +1,14 @@
-import 'package:festomps/screens/about_screen.dart';
+// import 'package:festomps/backup.dart';
+import 'package:festomps/providers/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import './providers/firebase_user_data.dart';
 import './screens/login_screen.dart';
 import './screens/home_screen.dart';
 import './screens/profile_screen.dart';
-import './providers/firebase_provider.dart';
+import './screens/about_screen.dart';
+import './screens/admin_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -23,8 +26,11 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_)=> FirebaseUserData(),
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => FirebaseUserData()),
+        ChangeNotifierProvider(create: (_) => FirebaseAuthenticationHandler()),
+      ],
       child: MaterialApp(
         title: appName,
         theme: ThemeData(
@@ -55,7 +61,8 @@ class MyApp extends StatelessWidget {
         routes: {
           HomeScreen.routeName: (_) => const HomeScreen(),
           ProfileScreen.routeName: (_) => const ProfileScreen(),
-          AboutScreen.routeName:(_)=>const AboutScreen(),
+          AboutScreen.routeName: (_) => const AboutScreen(),
+          AdminScreen.routeName: (_) => const AdminScreen(),
         },
         onGenerateRoute: (settings) => MaterialPageRoute(
           builder: (_) => defaultScreen,

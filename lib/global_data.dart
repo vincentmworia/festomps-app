@@ -24,5 +24,5 @@ List<String> alphabet = [
   'w',
   'x',
   'y',
-  'z'
+  'z',
 ];

@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../private_data.dart';
 import './home_screen.dart';
 import '../main.dart';
 import '../widgets/custom_drawer.dart';
 import '../widgets/custom_widgets.dart';
 import '../models/user.dart';
-import '../widgets/edit_profile_view.dart';
+import 'edit_profile_screen.dart';
 import '../widgets/fingerprint_enable_switch.dart';
-import '../providers/firebase_provider.dart';
+import '../providers/firebase_user_data.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({Key? key}) : super(key: key);
@@ -19,7 +20,7 @@ class ProfileScreen extends StatelessWidget {
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
     final borderRadius = BorderRadius.circular(35.0);
     final Size bnSize = Size(MediaQuery.of(context).size.width / 1.8, 55);
-    final User user = Provider.of<FirebaseUserData>(context).loggedInUser;
+    final User user = Provider.of<FirebaseUserData>(context).loggedInUser!;
 
     Card _container(
             {required double width,
@@ -49,7 +50,8 @@ class ProfileScreen extends StatelessWidget {
         );
 
     void _editProfileView(BuildContext context) {
-      Navigator.push(context, MaterialPageRoute(builder: (_)=>EditProfileView(user)));
+      Navigator.push(
+          context, MaterialPageRoute(builder: (_) => EditProfileScreen(user)));
     }
 
     return SafeArea(
@@ -111,7 +113,7 @@ class ProfileScreen extends StatelessWidget {
                   child: Center(
                       child: FittedBox(
                     child: Custom.titleText(
-                        user.isAdmin == 5334 ? 'ADMINISTRATOR' : 'NOT ADMIN'),
+                        user.admin == isAdmin ? 'ADMINISTRATOR' : 'NOT ADMIN'),
                   ))),
               _miniContainer(
                   width: constraints.maxWidth,
