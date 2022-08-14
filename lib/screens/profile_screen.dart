@@ -77,7 +77,7 @@ class ProfileScreen extends StatelessWidget {
                       SizedBox(
                           width: constraints.maxWidth,
                           height: constraints.maxHeight * 0.15,
-                          child: CustomDrawer.circleAvatar()),
+                          child: CustomDrawer.circleAvatar(user)),
                       Column(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [

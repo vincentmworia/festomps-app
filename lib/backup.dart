@@ -237,6 +237,7 @@ class FirebaseAuthenticationHandler with ChangeNotifier {
     }
 
     final prefs = await SharedPreferences.getInstance();
+
     prefs.clear();
     notifyListeners();
   }

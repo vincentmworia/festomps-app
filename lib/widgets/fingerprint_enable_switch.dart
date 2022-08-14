@@ -23,6 +23,6 @@ class _FingerprintEnableSwitchState extends State<FingerprintEnableSwitch> {
     )),
         activeColor: MyApp.appSecondaryColor,
         value: switchData.switchValue,
-        onChanged: (value) => switchData.setSwitchValue(value));
+        onChanged: (value) => switchData.setSwitchValue(value,context));
   }
 }

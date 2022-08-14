@@ -10,9 +10,12 @@ import '../models/signIn.dart';
 import '../models/user.dart';
 
 class FirebaseAuthenticationHandler with ChangeNotifier {
+  // todo, token expire? force log out and reset preferences
+
   static Uri _urlAuth(String operation) => Uri.parse(
       'https://identitytoolkit.googleapis.com/v1/accounts:${operation}key=$webApiKey');
   static final Uri _urlRTdb = Uri.parse('$firebaseUrl/users.json');
+  static List<User>? otherUsers;
 
   static String getErrorMessage(String errorTitle) {
     var message = 'Authentication failed';
@@ -23,8 +26,6 @@ class FirebaseAuthenticationHandler with ChangeNotifier {
       message = 'This is not a valid email address';
     } else if (errorTitle.contains('NOT_ALLOWED')) {
       message = 'User needs to be allowed by the admin';
-    } else if (errorTitle.contains('OPERATION_NOT_ALLOWED:')) {
-      message = 'Password sign-in is disabled for this project';
     } else if (errorTitle.contains('TOO_MANY_ATTEMPTS_TRY_LATER:')) {
       message =
           'We have blocked all requests from this device due to unusual activity. Try again later.';
@@ -34,9 +35,6 @@ class FirebaseAuthenticationHandler with ChangeNotifier {
       message = 'Password must be at least 6 characters';
     } else if (errorTitle.contains('INVALID_PASSWORD')) {
       message = 'Invalid password';
-    } else if (errorTitle.contains('FORCE_LOGIN_SUCCESSFUL')) {
-      message = 'no error';
-      // todo MANUAL OVERRIDE
     } else {
       message = message;
     }
@@ -93,7 +91,8 @@ class FirebaseAuthenticationHandler with ChangeNotifier {
           "password": password,
           "returnSecureToken": true,
         }));
-    String? message;
+    String message;
+    bool isAuthenticated = false;
     final responseData = json.decode(response.body) as Map<String, dynamic>;
 
     if (responseData['error'] != null) {
@@ -103,17 +102,21 @@ class FirebaseAuthenticationHandler with ChangeNotifier {
     SignInData signInData = SignInData.fromMap(responseData);
     final allUsers = await http.get(Uri.parse('$firebaseUrl/users.json'));
     final allUsersData = json.decode(allUsers.body) as Map<String, dynamic>;
-    final List<User> otherUsers = [];
+    otherUsers = [];
     allUsersData.forEach((userId, userData) {
       User user = User.fromMap(userData as Map<String, dynamic>);
       if (userId == signInData.localId) {
         Provider.of<FirebaseUserData>(context, listen: false)
             .setLoggedInUser(user);
-      } else {
-        otherUsers.add(user);
+        if (user.allowedInApp == isAllowedInApp) {
+          isAuthenticated = true;
+        }
       }
+      otherUsers!.add(user);
     });
-    message = 'Welcome';
+    message = isAuthenticated
+        ? 'Welcome'
+        : 'User not authorized by admin to access the app';
     return message;
   }
 }

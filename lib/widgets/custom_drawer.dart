@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../main.dart';
+import '../models/user.dart';
 import '../screens/about_screen.dart';
 import '../screens/home_screen.dart';
 import '../screens/profile_screen.dart';
@@ -34,14 +35,14 @@ class CustomDrawer extends StatelessWidget {
     );
   }
 
-  static CircleAvatar circleAvatar() => const CircleAvatar(
+  static CircleAvatar circleAvatar(User user) => CircleAvatar(
         backgroundColor: MyApp.appSecondaryColor,
         child: Center(
           child: Padding(
-            padding: EdgeInsets.all(8.0),
+            padding: const EdgeInsets.all(8.0),
             child: Text(
-              'V\tM',
-              style: TextStyle(
+              '${user.firstName[0]}\t${user.lastName[0]}',
+              style: const TextStyle(
                   fontSize: 30.0,
                   fontWeight: FontWeight.bold,
                   color: MyApp.appPrimaryColor),
@@ -52,15 +53,16 @@ class CustomDrawer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final user = Provider.of<FirebaseUserData>(context).loggedInUser!;
     return Drawer(
       child: SingleChildScrollView(
         child: Column(
           children: <Widget>[
             UserAccountsDrawerHeader(
-              currentAccountPicture: circleAvatar(),
+              currentAccountPicture: circleAvatar(user),
               //todo share with profile
-              accountName: const Text("Vincent Mworia"),
-              accountEmail: const Text("mworiavin@gmail.com"),
+              accountName: Text("${user.firstName} ${user.lastName}"),
+              accountEmail: Text(user.email),
             ),
             _buildDrawer(
               icon: Custom.icon(Icons.home, MyApp.appPrimaryColor),

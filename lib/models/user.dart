@@ -39,7 +39,7 @@ class User {
         "firstname": firstName,
         "lastname": lastName,
         "password": password,
-        "amin": admin,
+        "admin": admin,
         "allowedInApp": allowedInApp,
         "online": online,
         // "loginDetails": [addLoginDetails()],

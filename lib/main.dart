@@ -32,6 +32,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => FirebaseAuthenticationHandler()),
       ],
       child: MaterialApp(
+        debugShowCheckedModeBanner: false,
         title: appName,
         theme: ThemeData(
           colorScheme: ColorScheme.fromSwatch(primarySwatch: Colors.green)

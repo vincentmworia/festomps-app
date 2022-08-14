@@ -20,16 +20,16 @@ class EditProfileScreen extends StatefulWidget {
 class _EditProfileScreenState extends State<EditProfileScreen> {
   final _formKey = GlobalKey<FormState>();
   var _isLoading = false;
-  var _userEmail = '';
-  var _userFirstName = '';
-  var _userLastName = '';
-  var _userPassword = '';
+  var _userEmailNew = '';
+  var _userFirstNameNew = '';
+  var _userLastNameNew = '';
+  var _userNewPassword = '';
 
   final _emailController = TextEditingController();
   final _firstNameController = TextEditingController();
   final _lastNameController = TextEditingController();
   final _oldPasswordController = TextEditingController();
-  final _passwordController = TextEditingController();
+  final _newPasswordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
 
   final _emailFocusNode = FocusNode();
@@ -55,7 +55,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     _lastNameController.dispose();
     _confirmPasswordController.dispose();
     _oldPasswordController.dispose();
-    _passwordController.dispose();
+    _newPasswordController.dispose();
   }
 
   Future<void> _submit() async {
@@ -64,26 +64,40 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       return;
     }
     _formKey.currentState!.save();
-
-    // todo submit to firebase
-    _userEmail = _userEmail.trim();
-    _userFirstName = _userFirstName.trim();
-    _userLastName = _userLastName.trim();
-    _userPassword = _userPassword;
+    _userEmailNew = _userEmailNew.trim();
+    _userFirstNameNew = _userFirstNameNew.trim();
+    _userLastNameNew = _userLastNameNew.trim();
+    _userNewPassword = _userNewPassword.trim();
 
     setState(() {
       _isLoading = true;
     });
+    // todo change email and password in firebase auth, fingerprint shared pref api
+    // todo submit to firebase
+    if (_userEmailNew != widget.user.email) {}
+    if (_userNewPassword != widget.user.password) {}
+
     if (kDebugMode) {
       print('''
-    Email:\t$_userEmail
-    Firstname:\t$_userFirstName
-    Lastname:\t$_userLastName
-    new password:\t$_userPassword
+    Email:\t$_userEmailNew
+    Firstname:\t$_userFirstNameNew
+    Lastname:\t$_userLastNameNew
+    new password:\t$_userNewPassword
     ''');
     }
-    await Custom.showCustomDialog(context, 'UPDATE SUCCESSFUL');
+    User usr = User(
+        id: widget.user.id,
+        email: _userEmailNew,
+        firstName: _userFirstNameNew,
+        lastName: _userLastNameNew,
+        password: _userNewPassword,
+        admin: widget.user.admin,
+        allowedInApp: widget.user.allowedInApp,
+        online: widget.user.online,
+        loginDetails: widget.user.loginDetails);
+    Provider.of<FirebaseUserData>(context,listen: false).setLoggedInUser(usr);
 
+    await Custom.showCustomDialog(context, 'UPDATE SUCCESSFUL');
     Future.delayed(Duration.zero).then((_) => Navigator.pop(context));
   }
 
@@ -102,7 +116,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     _firstNameController.text = '';
     _lastNameController.text = '';
     _oldPasswordController.text = '';
-    _passwordController.text = '';
+    _newPasswordController.text = '';
     _confirmPasswordController.text = '';
   }
 
@@ -118,7 +132,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     return SafeArea(
       child: Scaffold(
         appBar: AppBar(
-          title: Custom.titleText('Edit Profile'),
+          title: Custom.titleText('EDIT PROFILE'),
           leading: IconButton(
             icon: Custom.icon(Icons.arrow_back, MyApp.appSecondaryColor),
             onPressed: () => Navigator.pop(context),
@@ -129,20 +143,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             height: deviceHeight,
             child: Stack(
               children: [
-                Container(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        MyApp.appPrimaryColor.withOpacity(0.5),
-                        MyApp.appSecondaryColor.withOpacity(0.5),
-                        MyApp.appSecondaryColor2.withOpacity(0.5),
-                      ],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      stops: const [0, 1, 3],
-                    ),
-                  ),
-                ),
+                Custom.containerStyled,
                 Center(
                   child: SizedBox(
                     height: deviceHeight / 1.2,
@@ -179,7 +180,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                                     return null;
                                   },
                                   onSaved: (value) {
-                                    _userEmail = value!;
+                                    _userEmailNew = value!;
                                   },
                                 ),
                                 InputField(
@@ -214,7 +215,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                                     return null;
                                   },
                                   onSaved: (value) {
-                                    _userFirstName = value!;
+                                    _userFirstNameNew = value!;
                                   },
                                 ),
                                 InputField(
@@ -253,7 +254,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                                     return null;
                                   },
                                   onSaved: (value) {
-                                    _userLastName = value!;
+                                    _userLastNameNew = value!;
                                   },
                                 ),
                                 InputField(
@@ -281,12 +282,12 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                                     return null;
                                   },
                                   onSaved: (value) {
-                                    _userPassword = value!;
+                                    _userNewPassword = value!;
                                   },
                                 ),
                                 InputField(
                                   key: const ValueKey('newPassword'),
-                                  controller: _passwordController,
+                                  controller: _newPasswordController,
                                   hintText: 'New Password',
                                   icon: Icons.lock,
                                   obscureText: true,
@@ -305,25 +306,25 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                                     if (value.length < 7) {
                                       return 'Password must be at least 7 characters long';
                                     }
-                                    if (_passwordController.text
+                                    if (_newPasswordController.text
                                                 .toLowerCase()
                                                 .trim() ==
                                             _firstNameController.text
                                                 .toLowerCase()
                                                 .trim() ||
-                                        _passwordController.text
+                                        _newPasswordController.text
                                                 .toLowerCase()
                                                 .trim() ==
                                             '${_firstNameController.text}${_lastNameController.text}'
                                                 .toLowerCase()
                                                 .trim() ||
-                                        _passwordController.text
+                                        _newPasswordController.text
                                                 .toLowerCase()
                                                 .trim() ==
                                             _lastNameController.text
                                                 .toLowerCase()
                                                 .trim() ||
-                                        _passwordController.text
+                                        _newPasswordController.text
                                                 .toLowerCase()
                                                 .trim() ==
                                             _emailController.text
@@ -334,7 +335,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                                     return null;
                                   },
                                   onSaved: (value) {
-                                    _userPassword = value!;
+                                    _userNewPassword = value!;
                                   },
                                 ),
                                 InputField(
@@ -354,7 +355,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                                     if (value == null || value.isEmpty) {
                                       return 'Please enter a valid password.';
                                     }
-                                    if (_passwordController.text !=
+                                    if (_newPasswordController.text !=
                                         _confirmPasswordController.text) {
                                       return 'Passwords do not match';
                                     }
