@@ -1,9 +1,9 @@
-import 'package:festomps/private_data.dart';
-import 'package:festomps/screens/admin_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../main.dart';
+import '../private_data.dart';
+import '../screens/admin_screen.dart';
 import '../models/user.dart';
 import '../screens/about_screen.dart';
 import '../screens/home_screen.dart';

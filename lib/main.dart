@@ -58,6 +58,7 @@ class MyApp extends StatelessWidget {
           ),
           errorColor: Colors.red,
         ),
+        // todo after 1hr check whether app is active
         home: defaultScreen,
         routes: {
           HomeScreen.routeName: (_) => const HomeScreen(),

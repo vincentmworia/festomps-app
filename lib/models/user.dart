@@ -1,5 +1,5 @@
 class User {
-  final String id;
+  final String localId;
   final String email;
   final String firstName;
   final String lastName;
@@ -10,7 +10,7 @@ class User {
   List<dynamic> loginDetails;
 
   User({
-    required this.id,
+    required this.localId,
     required this.email,
     required this.firstName,
     required this.lastName,
@@ -22,7 +22,7 @@ class User {
   });
 
   static User fromMap(Map<String, dynamic> user) => User(
-        id: user['localId'] as String,
+        localId: user['localId'] as String,
         email: user['email'] as String,
         firstName: user['firstname'] as String,
         lastName: user['lastname'] as String,
@@ -34,7 +34,7 @@ class User {
       );
 
   Map<String, dynamic> toMap() => {
-        "localId": id,
+        "localId": localId,
         "email": email,
         "firstname": firstName,
         "lastname": lastName,

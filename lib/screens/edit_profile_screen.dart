@@ -1,6 +1,10 @@
-import 'package:flutter/foundation.dart';
+import 'dart:convert';
+
+import 'package:festomps/providers/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../main.dart';
 import '../global_data.dart';
@@ -69,36 +73,74 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     _userLastNameNew = _userLastNameNew.trim();
     _userNewPassword = _userNewPassword.trim();
 
-    setState(() {
-      _isLoading = true;
-    });
-    // todo change email and password in firebase auth, fingerprint shared pref api
-    // todo submit to firebase
-    if (_userEmailNew != widget.user.email) {}
-    if (_userNewPassword != widget.user.password) {}
+    setState(() => _isLoading = true);
 
-    if (kDebugMode) {
-      print('''
-    Email:\t$_userEmailNew
-    Firstname:\t$_userFirstNameNew
-    Lastname:\t$_userLastNameNew
-    new password:\t$_userNewPassword
-    ''');
+    // update to firebase auth
+    try {
+      await FirebaseAuthenticationHandler.updateEmailPassword(
+              email: _userEmailNew,
+              password: _userNewPassword,
+              idToken: widget.user.localId)
+          .then((message) async {
+        if (message == "UPDATE SUCCESSFUL") {
+          print('email updated');
+          User usr = User(
+              localId: widget.user.localId,
+              email: _userEmailNew,
+              firstName: _userFirstNameNew,
+              lastName: _userLastNameNew,
+              password: _userNewPassword,
+              admin: widget.user.admin,
+              allowedInApp: widget.user.allowedInApp,
+              online: widget.user.online,
+              loginDetails: widget.user.loginDetails);
+          // update to local app
+          Provider.of<FirebaseUserData>(context, listen: false)
+              .setLoggedInUser(usr);
+
+          if (Provider.of<FirebaseUserData>(context, listen: false)
+              .switchValue) {
+            final prefs = await SharedPreferences.getInstance();
+            prefs.remove(FirebaseUserData.prefName);
+            prefs.setString(
+                FirebaseUserData.prefName,
+                json.encode({
+                  'email': usr.email,
+                  'password': usr.password,
+                }));
+          }
+
+          // update to firebase rtdb
+          final resp = await http.patch(FirebaseAuthenticationHandler.usersUrl,
+              body: json.encode({
+                usr.localId: {
+                  'localId': usr.localId,
+                  'email': usr.email,
+                  'firstname': usr.firstName,
+                  'lastname': usr.lastName,
+                  'password': usr.password,
+                  'admin': usr.admin,
+                  'allowedInApp': usr.allowedInApp,
+                  'online': usr.online,
+                  'loginDetails': usr.loginDetails,
+                },
+              }));
+          print(json.decode(resp.body));
+          Future.delayed(Duration.zero).then((_) async {
+            await Custom.showCustomDialog(context, 'UPDATE SUCCESSFUL')
+                .then((_) => Navigator.pop(context));
+          });
+        } else {
+          Future.delayed(Duration.zero).then((_) async {
+            await Custom.showCustomDialog(context, message)
+                .then((_) => setState(() => _isLoading = false));
+          });
+        }
+      });
+    } catch (error) {
+      const errorMessage = 'Failed,check the internet connection later';
+      return Custom.showCustomDialog(context, errorMessage);
     }
-    User usr = User(
-        id: widget.user.id,
-        email: _userEmailNew,
-        firstName: _userFirstNameNew,
-        lastName: _userLastNameNew,
-        password: _userNewPassword,
-        admin: widget.user.admin,
-        allowedInApp: widget.user.allowedInApp,
-        online: widget.user.online,
-        loginDetails: widget.user.loginDetails);
-    Provider.of<FirebaseUserData>(context,listen: false).setLoggedInUser(usr);
-
-    await Custom.showCustomDialog(context, 'UPDATE SUCCESSFUL');
-    Future.delayed(Duration.zero).then((_) => Navigator.pop(context));
   }
 
   @override
@@ -124,7 +166,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final user = Provider.of<FirebaseUserData>(context);
+    // final user = Provider.of<FirebaseUserData>(context);
     // todo insert the new user and update the data
     final deviceHeight =
         MediaQuery.of(context).size.height - MediaQuery.of(context).padding.top;
@@ -133,10 +175,12 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       child: Scaffold(
         appBar: AppBar(
           title: Custom.titleText('EDIT PROFILE'),
-          leading: IconButton(
-            icon: Custom.icon(Icons.arrow_back, MyApp.appSecondaryColor),
-            onPressed: () => Navigator.pop(context),
-          ),
+          leading: _isLoading
+              ? Center()
+              : IconButton(
+                  icon: Custom.icon(Icons.arrow_back, MyApp.appSecondaryColor),
+                  onPressed: () => Navigator.pop(context),
+                ),
         ),
         body: SingleChildScrollView(
           child: SizedBox(

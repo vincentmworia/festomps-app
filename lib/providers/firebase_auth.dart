@@ -10,18 +10,26 @@ import '../models/signIn.dart';
 import '../models/user.dart';
 
 class FirebaseAuthenticationHandler with ChangeNotifier {
+  static String? _token;
+  static String? _expiresIn;
+
+  String? get token => _token;
+
   // todo, token expire? force log out and reset preferences
 
   static Uri _urlAuth(String operation) => Uri.parse(
       'https://identitytoolkit.googleapis.com/v1/accounts:${operation}key=$webApiKey');
-  static final Uri _urlRTdb = Uri.parse('$firebaseUrl/users.json');
+  static final Uri usersUrl = Uri.parse('$firebaseUrl/users.json');
   static List<User>? otherUsers;
 
   static String getErrorMessage(String errorTitle) {
-    var message = 'Authentication failed';
+    var message = 'Operation failed';
 
     if (errorTitle.contains('EMAIL_EXISTS')) {
       message = 'Email is already in use';
+    }
+    if (errorTitle.contains('CREDENTIAL_TOO_OLD_LOGIN_AGAIN')) {
+      message = 'Select a new email';
     } else if (errorTitle.contains('INVALID_EMAIL')) {
       message = 'This is not a valid email address';
     } else if (errorTitle.contains('NOT_ALLOWED')) {
@@ -59,7 +67,7 @@ class FirebaseAuthenticationHandler with ChangeNotifier {
       message = getErrorMessage(responseData['error']['message']);
       return message;
     } else {
-      await http.patch(_urlRTdb,
+      await http.patch(usersUrl,
           body: json.encode({
             "${responseData['localId']}": {
               'localId': responseData['localId'],
@@ -100,6 +108,8 @@ class FirebaseAuthenticationHandler with ChangeNotifier {
       return message;
     }
     SignInData signInData = SignInData.fromMap(responseData);
+    _token = signInData.idToken;
+    _expiresIn = signInData.expiresIn;
     final allUsers = await http.get(Uri.parse('$firebaseUrl/users.json'));
     final allUsersData = json.decode(allUsers.body) as Map<String, dynamic>;
     otherUsers = [];
@@ -117,6 +127,53 @@ class FirebaseAuthenticationHandler with ChangeNotifier {
     message = isAuthenticated
         ? 'Welcome'
         : 'User not authorized by admin to access the app';
+    return message;
+  }
+
+  static Future<String> updateEmailPassword(
+      {required String email,
+      required String password,
+      required String idToken}) async {
+    String message = "error";
+    final response = await http.post(_urlAuth('update?'),
+        body: json.encode({
+          "idToken": _token,
+          "email": email,
+          "password": password,
+          "returnSecureToken": true,
+        }));
+    final responseData = json.decode(response.body) as Map<String, dynamic>;
+
+    if (responseData['error'] != null) {
+      print(responseData['error']);
+      message = getErrorMessage(responseData['error']['message']);
+    } else {
+      _token = responseData['idToken'];
+      _expiresIn = "3600";
+
+      print(responseData["email"]);
+      print(responseData["passwordHash"]);
+
+      message = "UPDATE SUCCESSFUL";
+    }
+    return message;
+  }
+
+  static Future<String> deleteAccount() async {
+    String message = "error";
+    final response = await http.post(_urlAuth('delete?'),
+        body: json.encode({
+          "idToken": _token,
+        }));
+    final responseData = json.decode(response.body) as Map<String, dynamic>;
+
+    // todo delete fails here
+    print(responseData['error']);
+    if (responseData['error'] != null) {
+      message = getErrorMessage(responseData['error']['message']);
+    } else {
+      message = "DELETE SUCCESSFUL";
+    }
     return message;
   }
 }

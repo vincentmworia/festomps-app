@@ -1,5 +1,9 @@
+import 'package:festomps/providers/firebase_auth.dart';
+import 'package:festomps/screens/login_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../private_data.dart';
 import './home_screen.dart';
@@ -7,7 +11,7 @@ import '../main.dart';
 import '../widgets/custom_drawer.dart';
 import '../widgets/custom_widgets.dart';
 import '../models/user.dart';
-import 'edit_profile_screen.dart';
+import './edit_profile_screen.dart';
 import '../widgets/fingerprint_enable_switch.dart';
 import '../providers/firebase_user_data.dart';
 
@@ -54,6 +58,52 @@ class ProfileScreen extends StatelessWidget {
           context, MaterialPageRoute(builder: (_) => EditProfileScreen(user)));
     }
 
+    Future<void> _deleteAccount() async {
+      print('here');
+      await showDialog(
+          context: context,
+          builder: (ctx) => AlertDialog(
+                // title: const Text(''),
+                content: Custom.normalText('Are you sure you want to delete '
+                    '${user.firstName} ${user.lastName} \'s account?'),
+                actions: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      ElevatedButton(
+                          onPressed: () {
+                            Navigator.pop(context);
+                          },
+                          child: const Text('No')),
+                      ElevatedButton(
+                          onPressed: () async {
+                            final message = await FirebaseAuthenticationHandler
+                                .deleteAccount();
+                            if (message == "UPDATE SUCCESSFUL") {
+
+                              Future.delayed(Duration.zero).then((_) async {
+                                // Clearr firebase
+                                await http.delete(Uri.parse(
+                                    '$firebaseUrl/users/${user.localId}.json'));
+                                // Clearr fingerprint
+                                final prefs =
+                                    await SharedPreferences.getInstance();
+                                prefs.remove(FirebaseUserData.prefName);
+                              }).then((_) => Navigator.pushReplacementNamed(
+                                  context, LoginScreen.routeName));
+                            } else {
+                              Future.delayed(Duration.zero).then((_) async =>
+                                  await Custom.showCustomDialog(
+                                      context, message));
+                            }
+                          },
+                          child: const Text('Yes')),
+                    ],
+                  )
+                ],
+              ));
+    }
+
     return SafeArea(
         child: Scaffold(
       key: scaffoldKey,
@@ -70,7 +120,7 @@ class ProfileScreen extends StatelessWidget {
             children: <Widget>[
               _container(
                   width: constraints.maxWidth,
-                  height: constraints.maxHeight * 0.5,
+                  height: constraints.maxHeight * 0.55,
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: <Widget>[
@@ -104,7 +154,23 @@ class ProfileScreen extends StatelessWidget {
                                   fontSize: 25.0)),
                           onPressed: () => _editProfileView(context),
                           icon:
-                              Custom.icon(Icons.edit, MyApp.appSecondaryColor))
+                              Custom.icon(Icons.edit, MyApp.appSecondaryColor)),
+                      ElevatedButton.icon(
+                          style: ElevatedButton.styleFrom(
+                              minimumSize: bnSize,
+                              maximumSize: bnSize,
+                              padding: const EdgeInsets.all(10),
+                              elevation: 3,
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(20.0))),
+                          label: const Text('Delete User',
+                              style: TextStyle(
+                                  color: MyApp.appSecondaryColor,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 25.0)),
+                          onPressed: () => _deleteAccount(),
+                          icon: Custom.icon(
+                              Icons.delete, MyApp.appSecondaryColor)),
                     ],
                   )),
               _miniContainer(

@@ -6,7 +6,6 @@ import 'package:local_auth/local_auth.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../models/user.dart';
 import '../providers/firebase_auth.dart';
 import './home_screen.dart';
 import '../providers/firebase_user_data.dart';
@@ -28,9 +27,11 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
-  late AuthenticationMode _authenticationMode;
+  AuthenticationMode _authenticationMode = AuthenticationMode.login;
+  var _init = true;
 
   var _isLoading = false;
+  var _isReadingFingerprint = false;
   var _userEmail = '';
   var _userFirstName = '';
   var _userLastName = '';
@@ -64,6 +65,7 @@ class _LoginScreenState extends State<LoginScreen> {
   Future<void> _getAuth() async {
     bool isAuth = false;
     try {
+      setState(() => _isReadingFingerprint = true);
       isAuth = await authentication.authenticate(
         localizedReason: 'Scan your fingeprint to access the app',
         options: const AuthenticationOptions(
@@ -72,6 +74,7 @@ class _LoginScreenState extends State<LoginScreen> {
           stickyAuth: true,
         ),
       );
+      setState(() => _isReadingFingerprint = false);
       if (isAuth) {
         // todo Sign in here, with username and password from shared preferences
         final prefs = await SharedPreferences.getInstance();
@@ -134,7 +137,7 @@ class _LoginScreenState extends State<LoginScreen> {
             .then((message) => Custom.showCustomDialog(context, message));
       }
     } catch (error) {
-      const errorMessage = 'Could not authenticate you, please try again later';
+      const errorMessage = 'Failed,check the internet connection later';
       return Custom.showCustomDialog(context, errorMessage);
     } finally {
       setState(() {
@@ -145,11 +148,15 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   @override
-  void initState() {
-    super.initState();
-    _authenticationMode = AuthenticationMode.login;
-
-    Provider.of<FirebaseUserData>(context, listen: false).switchValueInit();
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_init) {
+      Future.delayed(Duration.zero)
+          .then((_) async =>
+              await Provider.of<FirebaseUserData>(context, listen: false)
+                  .switchValueInit())
+          .then((_) => setState(() => _init = false));
+    }
   }
 
   @override
@@ -157,7 +164,7 @@ class _LoginScreenState extends State<LoginScreen> {
     final deviceHeight =
         MediaQuery.of(context).size.height - MediaQuery.of(context).padding.top;
     final fingerprintUseAuthorized =
-        Provider.of<FirebaseUserData>(context, listen: false).switchValue;
+        Provider.of<FirebaseUserData>(context).switchValue;
 
     return SafeArea(
       child: Scaffold(
@@ -457,7 +464,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     ],
                   ),
                 ),
-                if (_isLoading)
+                if (_isLoading || _isReadingFingerprint)
                   Container(
                     height: deviceHeight,
                     color: MyApp.appSecondaryColor2.withOpacity(0.75),
@@ -473,6 +480,8 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   void dispose() {
     super.dispose();
+    _init = true;
+
     _emailFocusNode.dispose();
     _firstNameFocusNode.dispose();
     _lastNameFocusNode.dispose();
