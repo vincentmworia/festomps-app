@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../private_data.dart';
 import '../providers/firebase_user_data.dart';
@@ -16,7 +17,6 @@ class FirebaseAuthenticationHandler with ChangeNotifier {
   String? get token => _token;
 
   // todo, token expire? force log out and reset preferences
-
   static Uri _urlAuth(String operation) => Uri.parse(
       'https://identitytoolkit.googleapis.com/v1/accounts:${operation}key=$webApiKey');
   static final Uri usersUrl = Uri.parse('$firebaseUrl/users.json');
@@ -100,7 +100,8 @@ class FirebaseAuthenticationHandler with ChangeNotifier {
           "returnSecureToken": true,
         }));
     String message;
-    bool isAuthenticated = false;
+    bool isAllowed = false;
+    bool isPermitted = false;
     final responseData = json.decode(response.body) as Map<String, dynamic>;
 
     if (responseData['error'] != null) {
@@ -110,21 +111,45 @@ class FirebaseAuthenticationHandler with ChangeNotifier {
     SignInData signInData = SignInData.fromMap(responseData);
     _token = signInData.idToken;
     _expiresIn = signInData.expiresIn;
-    final allUsers = await http.get(Uri.parse('$firebaseUrl/users.json'));
+    final allUsers = await http.get(Uri.parse('$firebaseUrl/.json'));
     final allUsersData = json.decode(allUsers.body) as Map<String, dynamic>;
     otherUsers = [];
-    allUsersData.forEach((userId, userData) {
-      User user = User.fromMap(userData as Map<String, dynamic>);
+    User? user;
+    allUsersData['users'].forEach((userId, userData) {
+      user = User.fromMap(userData as Map<String, dynamic>);
       if (userId == signInData.localId) {
         Provider.of<FirebaseUserData>(context, listen: false)
-            .setLoggedInUser(user);
-        if (user.allowedInApp == isAllowedInApp) {
-          isAuthenticated = true;
+            .setLoggedInUser(user!);
+        if (user!.allowedInApp == isAllowedInApp ) {
+          isAllowed = true;
+        }
+        if(allUsersData['appActive']==appActive) {
+          isPermitted = true;
         }
       }
-      otherUsers!.add(user);
+      otherUsers!.add(user!);
     });
-    message = isAuthenticated
+
+    final prefs = await SharedPreferences.getInstance();
+    if (prefs.containsKey(FirebaseUserData.prefName)) {
+      final fingerprintData =
+          json.decode(prefs.getString(FirebaseUserData.prefName)!)
+              as Map<String, dynamic>;
+      if (email != fingerprintData['email'] as String) {
+        prefs.remove(FirebaseUserData.prefName);
+        Future.delayed(Duration.zero).then((_) =>
+            Provider.of<FirebaseUserData>(context, listen: false)
+                .setSwitchVal(false));
+      }
+    }
+  if(!isAllowed){
+      message ='User not authorized by admin to access the app';
+    }  else if(!isPermitted){
+      message ='SYSTEM IS OFF';
+    }else{
+      message ='Welcome';
+    }
+    message = isAllowed
         ? 'Welcome'
         : 'User not authorized by admin to access the app';
     return message;
@@ -145,15 +170,10 @@ class FirebaseAuthenticationHandler with ChangeNotifier {
     final responseData = json.decode(response.body) as Map<String, dynamic>;
 
     if (responseData['error'] != null) {
-      print(responseData['error']);
       message = getErrorMessage(responseData['error']['message']);
     } else {
       _token = responseData['idToken'];
       _expiresIn = "3600";
-
-      print(responseData["email"]);
-      print(responseData["passwordHash"]);
-
       message = "UPDATE SUCCESSFUL";
     }
     return message;

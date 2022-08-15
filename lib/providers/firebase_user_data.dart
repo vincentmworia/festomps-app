@@ -15,6 +15,10 @@ class FirebaseUserData with ChangeNotifier {
   bool get switchValue => _switchValue ?? false;
   bool? _switchValue;
 
+  void setSwitchVal(bool val){
+    _switchValue=val;
+  }
+
   Future<void> switchValueInit() async {
     final prefs = await SharedPreferences.getInstance();
     if (prefs.containsKey(FirebaseUserData.prefName)) {
