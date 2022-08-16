@@ -5,7 +5,6 @@ import 'package:festomps/screens/home_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
-import 'package:provider/provider.dart';
 import 'dart:convert';
 
 import '../models/admin.dart';
@@ -18,7 +17,6 @@ class AdminScreen extends StatefulWidget {
   const AdminScreen({Key? key}) : super(key: key);
   static const routeName = '/admin_screen';
 
-  // yyyy-MM-dd hh:mm:ss
   static String formatDate(DateTime time) =>
       DateFormat('dd/MM/yyyy hh:mm').format(time);
 
@@ -30,8 +28,9 @@ class _AdminScreenState extends State<AdminScreen> {
   // todo, Timer.periodic, in case there is change only, re-render the widget
   static final List<User> otherUsers = [];
 
-  Future<void> _getUsersData() async {
-    final allUsers = await http.get(Uri.parse('$firebaseUrl/.json'));
+  Future<List<dynamic>> _getUsersData() async {
+    final allUsers = await http.get(Uri.parse(
+        '$firebaseUrl/.json?auth=${FirebaseAuthenticationHandler.token}'));
     final allUsersData = json.decode(allUsers.body) as Map<String, dynamic>;
     otherUsers.clear();
     User? user;
@@ -39,6 +38,7 @@ class _AdminScreenState extends State<AdminScreen> {
       user = User.fromMap(userData as Map<String, dynamic>);
       otherUsers.add(user!);
     });
+    return otherUsers;
   }
 
   late StreamController _streamAdmin;
@@ -57,7 +57,6 @@ class _AdminScreenState extends State<AdminScreen> {
           Timer.periodic(const Duration(seconds: 10), (timer) async {
         await _getUsersData()
             .then((value) => _streamAdmin.sink.add(otherUsers));
-        // otherUsers.clear();
       });
     });
   }
@@ -74,25 +73,24 @@ class _AdminScreenState extends State<AdminScreen> {
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
     final deviceHeight =
         MediaQuery.of(context).size.height - MediaQuery.of(context).padding.top;
-
+    // final List<Admin> onlineUsersList = [];
     final List<Admin> allUsersList = [];
-    final List<Admin> onlineUsersList = [];
     final List<Admin> allowUsersList = [];
+    var i = 0;
     return SafeArea(
       child: Scaffold(
         key: scaffoldKey,
         appBar: HomeScreen.appBar(scaffoldKey, 'Admin'),
         drawer: const CustomDrawer(),
-        body: StreamBuilder(
-            stream: _streamAdmin.stream,
+        body: FutureBuilder(
+            future: _getUsersData(),
             builder: (context, snap) {
               if (snap.connectionState == ConnectionState.waiting) {
                 return Custom.containerLoading(deviceHeight);
               }
-              print('stream');
-
-              //  allUsersList.clear();
-              //  allowUsersList.clear();
+              // i++;
+              allUsersList.clear();
+              allowUsersList.clear();
               // onlineUsersList.clear();
 
               for (User user in snap.data as List<User>) {
@@ -140,10 +138,6 @@ class _AdminScreenState extends State<AdminScreen> {
                         user.allowedInApp['allowedInApp'] == isAllowedInApp,
                     online: user.online['online'] as bool,
                     loginData: loginData);
-
-                if (newUser.online) {
-                  onlineUsersList.add(newUser);
-                }
                 if (!newUser.allowedInApp) {
                   allowUsersList.add(newUser);
                 }
@@ -153,11 +147,13 @@ class _AdminScreenState extends State<AdminScreen> {
               return SingleChildScrollView(
                 child: Column(
                   children: [
-                    Custom.titleText('\nONLINE USERS\n'),
-                    ...onlineUsersList.map((e) => Text(e.email)).toList(),
-                    Custom.titleText('ALLOW USERS\n'),
-                    ...allowUsersList.map((e) => Text(e.email)).toList(),
-                    Custom.titleText('ALL USERS'),
+                    // Custom.titleText('\nONLINE USERS'),
+                    // ...onlineUsersList.map((e) => Text(e.email)).toList(),
+                    if (allowUsersList.isNotEmpty)
+                      Custom.titleText('ALLOW USERS'),
+                    if (allowUsersList.isNotEmpty)
+                      ...allowUsersList.map((e) => Text(e.email)).toList(),
+                    Custom.titleText('\nALL USERS'),
                     ...allUsersList.map((Admin user) => Text('''
                 email\t${user.email}:{
                 First Name\t${user.firstName},

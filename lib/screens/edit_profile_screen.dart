@@ -79,6 +79,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     // update to firebase auth
     try {
       await FirebaseAuthenticationHandler.updateEmailPassword(
+              context: context,
               email: _userEmailNew,
               password: _userNewPassword,
               idToken: widget.user.localId)
@@ -111,8 +112,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           }
 
           // update to firebase rtdb
-           await http.patch(Uri.parse(
-               '$firebaseUrl/users.json'),
+          await http.patch(Uri.parse('$firebaseUrl/users.json?auth=${FirebaseAuthenticationHandler.token}'),
               body: json.encode({
                 usr.localId: {
                   'localId': usr.localId,
@@ -176,7 +176,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         appBar: AppBar(
           backgroundColor:
               _isLoading ? MyApp.appSecondaryColor2.withOpacity(0.75) : null,
-          title: Custom.titleText(_isLoading ?'':'EDIT PROFILE'),
+          title: Custom.titleText(_isLoading ? '' : 'EDIT PROFILE'),
           leading: _isLoading
               ? const Center()
               : IconButton(

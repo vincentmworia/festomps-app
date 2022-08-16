@@ -85,14 +85,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           Future.delayed(Duration.zero)
                               .then((_) => Navigator.pop(context));
                           setState(() => _isLoading = true);
-                          try{
+                          try {
                             final message = await FirebaseAuthenticationHandler
                                 .deleteAccount();
 
                             if (message == "DELETE SUCCESSFUL") {
                               Future.delayed(Duration.zero).then((_) async {
                                 await http.delete(Uri.parse(
-                                    '$firebaseUrl/users/${user.localId}.json'));
+                                    '$firebaseUrl/users/${user.localId}.json?auth=${FirebaseAuthenticationHandler.token}'));
                                 final prefs =
                                     await SharedPreferences.getInstance();
                                 prefs.remove(FirebaseUserData.prefName);
@@ -107,7 +107,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   .then((_) =>
                                       setState(() => _isLoading = false));
                             }
-                          }catch (error) {
+                          } catch (error) {
                             const errorMessage =
                                 'Failed, check the internet connection later';
                             return await Custom.showCustomDialog(
@@ -223,8 +223,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             }),
           ),
         ),
-        if (_isLoading)
-       Custom.containerLoading(deviceHeight),
+        if (_isLoading) Custom.containerLoading(deviceHeight),
       ],
     ));
   }
