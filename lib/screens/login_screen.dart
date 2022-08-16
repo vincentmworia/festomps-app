@@ -127,9 +127,10 @@ class _LoginScreenState extends State<LoginScreen> {
     });
     try {
       if (_authenticationMode == AuthenticationMode.login) {
-        await _activateLogin(_userEmail, _userPassword);
+         await _activateLogin(_userEmail, _userPassword);
       } else {
         await FirebaseAuthenticationHandler.signup(
+                context: context,
                 firstname: _userFirstName,
                 lastname: _userLastName,
                 email: _userEmail,

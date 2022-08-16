@@ -2,6 +2,8 @@ import 'dart:async';
 
 import 'package:festomps/providers/firebase_auth.dart';
 import 'package:festomps/screens/home_screen.dart';
+import 'package:festomps/widgets/admin_allow_users.dart';
+
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
@@ -27,6 +29,7 @@ class AdminScreen extends StatefulWidget {
 class _AdminScreenState extends State<AdminScreen> {
   // todo, Timer.periodic, in case there is change only, re-render the widget
   static final List<User> otherUsers = [];
+  var _isLoading = false;
 
   Future<List<dynamic>> _getUsersData() async {
     final allUsers = await http.get(Uri.parse(
@@ -41,31 +44,33 @@ class _AdminScreenState extends State<AdminScreen> {
     return otherUsers;
   }
 
-  late StreamController _streamAdmin;
-  late Timer _iterateStream;
+  Future<void> _allowUser(bool addUser, Admin user) async {
+    setState(() => _isLoading = true);
+    if (addUser) {
+      await http
+          .patch(
+              Uri.parse(
+                  '$firebaseUrl/users/${user.localId}/allowedInApp.json?auth=${FirebaseAuthenticationHandler.token}'),
+              body: json.encode({'allowedInApp': isAllowedInApp}))
+          .then((_) => setState(() => _isLoading = false));
+    } else {
+      await http
+          .delete(Uri.parse(
+              '$firebaseUrl/users/${user.localId}.json?auth=${FirebaseAuthenticationHandler.token}'))
+          .then((value) => setState(() => _isLoading = false));
+    }
+  }
 
   @override
   void initState() {
     super.initState();
-    _streamAdmin = StreamController();
-
-    Future.delayed(Duration.zero)
-        .then((value) async => await _getUsersData())
-        .then((value) {
-      _streamAdmin.sink.add(otherUsers);
-      _iterateStream =
-          Timer.periodic(const Duration(seconds: 10), (timer) async {
-        await _getUsersData()
-            .then((value) => _streamAdmin.sink.add(otherUsers));
-      });
-    });
+    // _searchController=TextEditingController();
   }
 
   @override
   void dispose() {
     super.dispose();
-    _streamAdmin.close();
-    _iterateStream.cancel();
+    // _searchController.dispose();
   }
 
   @override
@@ -76,85 +81,87 @@ class _AdminScreenState extends State<AdminScreen> {
     // final List<Admin> onlineUsersList = [];
     final List<Admin> allUsersList = [];
     final List<Admin> allowUsersList = [];
-    var i = 0;
     return SafeArea(
       child: Scaffold(
         key: scaffoldKey,
-        appBar: HomeScreen.appBar(scaffoldKey, 'Admin'),
+        appBar: _isLoading ? null : HomeScreen.appBar(scaffoldKey, 'Admin'),
         drawer: const CustomDrawer(),
-        body: FutureBuilder(
-            future: _getUsersData(),
-            builder: (context, snap) {
-              if (snap.connectionState == ConnectionState.waiting) {
-                return Custom.containerLoading(deviceHeight);
-              }
-              // i++;
-              allUsersList.clear();
-              allowUsersList.clear();
-              // onlineUsersList.clear();
+        body: _isLoading
+            ? Custom.containerLoading(deviceHeight)
+            : FutureBuilder(
+                future: _getUsersData(),
+                builder: (context, snap) {
+                  if (snap.connectionState == ConnectionState.waiting) {
+                    return Custom.containerLoading(deviceHeight);
+                  }
+                  // i++;
+                  allUsersList.clear();
+                  allowUsersList.clear();
+                  // onlineUsersList.clear();
 
-              for (User user in snap.data as List<User>) {
-                var loginData = [];
-                final userLogins =
-                    (user.loginDetails as Map<String, dynamic>).values.toList();
-                userLogins.removeWhere((data) => data == true);
-                for (Map<String, dynamic> logins in userLogins) {
-                  final loginTime = DateTime.parse(logins['login']);
-                  final logoutTime = DateTime.parse(logins['logout']);
-                  final loginDuration = logoutTime.difference(loginTime);
+                  for (User user in snap.data as List<User>) {
+                    var loginData = [];
+                    final userLogins =
+                        (user.loginDetails as Map<String, dynamic>)
+                            .values
+                            .toList();
+                    userLogins.removeWhere((data) => data == true);
+                    for (Map<String, dynamic> logins in userLogins) {
+                      final loginTime = DateTime.parse(logins['login']);
+                      final logoutTime = DateTime.parse(logins['logout']);
+                      final loginDuration = logoutTime.difference(loginTime);
 
-                  var timeInHrs = loginDuration.inHours.toString();
-                  var timeInMin = loginDuration.inMinutes.toString();
-                  var timeInSec = loginDuration.inSeconds.toString();
-                  var timeInMilliSec = loginDuration.inMilliseconds.toString();
+                      var timeInHrs = loginDuration.inHours.toString();
+                      var timeInMin = loginDuration.inMinutes.toString();
+                      var timeInSec = loginDuration.inSeconds.toString();
+                      var timeInMilliSec =
+                          loginDuration.inMilliseconds.toString();
 
-                  String? duration;
-                  if (timeInMin == '0' &&
-                      timeInHrs == '0' &&
-                      timeInSec == '0') {
-                    duration = '$timeInMilliSec mill';
-                  } else if (timeInMin == '0' && timeInHrs == '0') {
-                    duration = '$timeInSec sec';
-                  } else if (timeInHrs == '0') {
-                    duration = '$timeInMin min';
-                  } else {
-                    '$timeInHrs hrs';
+                      String? duration;
+                      if (timeInMin == '0' &&
+                          timeInHrs == '0' &&
+                          timeInSec == '0') {
+                        duration = '$timeInMilliSec mill';
+                      } else if (timeInMin == '0' && timeInHrs == '0') {
+                        duration = '$timeInSec sec';
+                      } else if (timeInHrs == '0') {
+                        duration = '$timeInMin min';
+                      } else {
+                        '$timeInHrs hrs';
+                      }
+
+                      loginData.add({
+                        'login': AdminScreen.formatDate(loginTime),
+                        'logout': AdminScreen.formatDate(logoutTime),
+                        'duration': duration,
+                      });
+                    }
+                    final newUser = Admin(
+                        localId: user.localId,
+                        email: user.email,
+                        firstName: user.firstName,
+                        lastName: user.lastName,
+                        password: user.password,
+                        admin: user.admin['admin'] == isAdmin,
+                        allowedInApp:
+                            user.allowedInApp['allowedInApp'] == isAllowedInApp,
+                        online: user.online['online'] as bool,
+                        loginData: loginData);
+                    if (!newUser.allowedInApp) {
+                      allowUsersList.add(newUser);
+                    }
+                    allUsersList.add(newUser);
                   }
 
-                  loginData.add({
-                    'login': AdminScreen.formatDate(loginTime),
-                    'logout': AdminScreen.formatDate(logoutTime),
-                    'duration': duration,
-                  });
-                }
-                final newUser = Admin(
-                    localId: user.localId,
-                    email: user.email,
-                    firstName: user.firstName,
-                    lastName: user.lastName,
-                    password: user.password,
-                    admin: user.admin['admin'] == isAdmin,
-                    allowedInApp:
-                        user.allowedInApp['allowedInApp'] == isAllowedInApp,
-                    online: user.online['online'] as bool,
-                    loginData: loginData);
-                if (!newUser.allowedInApp) {
-                  allowUsersList.add(newUser);
-                }
-                allUsersList.add(newUser);
-              }
-
-              return SingleChildScrollView(
-                child: Column(
-                  children: [
-                    // Custom.titleText('\nONLINE USERS'),
-                    // ...onlineUsersList.map((e) => Text(e.email)).toList(),
-                    if (allowUsersList.isNotEmpty)
-                      Custom.titleText('ALLOW USERS'),
-                    if (allowUsersList.isNotEmpty)
-                      ...allowUsersList.map((e) => Text(e.email)).toList(),
-                    Custom.titleText('\nALL USERS'),
-                    ...allUsersList.map((Admin user) => Text('''
+                  return SingleChildScrollView(
+                    child: Column(
+                      children: [
+                        // Custom.titleText('\nONLINE USERS'),
+                        // ...onlineUsersList.map((e) => Text(e.email)).toList(),
+                        if (allowUsersList.isNotEmpty)
+                          AdminAllowUsers(allowUsersList, _allowUser),
+                        Custom.titleText('\nALL USERS'),
+                        ...allUsersList.map((Admin user) => Text('''
                 email\t${user.email}:{
                 First Name\t${user.firstName},
                 Last Name\t${user.lastName},
@@ -164,10 +171,10 @@ class _AdminScreenState extends State<AdminScreen> {
                 id\t${user.localId},
                 LoginData\t${user.loginData},} 
                 ''')).toList(),
-                  ],
-                ),
-              );
-            }),
+                      ],
+                    ),
+                  );
+                }),
       ),
     );
   }

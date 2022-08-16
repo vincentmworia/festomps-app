@@ -42,7 +42,7 @@ class FirebaseUserData with ChangeNotifier {
           context: context,
           builder: (ctx) => AlertDialog(
                 content:
-                    Custom.normalText('Do you want to login with fingerprint?'),
+                    Custom.normalText('Do you want to login ${loggedInUser!.email} with fingerprint?'),
                 actions: [
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,

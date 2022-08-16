@@ -20,7 +20,6 @@ class FirebaseAuthenticationHandler with ChangeNotifier {
 
   static String? get token => _token;
 
-
   // todo, token expire? force log out and reset preferences
   static Uri _urlAuth(String operation) => Uri.parse(
       'https://identitytoolkit.googleapis.com/v1/accounts:${operation}key=$webApiKey');
@@ -53,6 +52,7 @@ class FirebaseAuthenticationHandler with ChangeNotifier {
   }
 
   static Future<String> signup({
+    required BuildContext context,
     required String firstname,
     required String lastname,
     required String email,
@@ -70,20 +70,31 @@ class FirebaseAuthenticationHandler with ChangeNotifier {
       message = getErrorMessage(responseData['error']['message']);
       return message;
     } else {
-      await http.patch(Uri.parse('$firebaseUrl/users.json?auth=$token'),
+      final res = await http.post(_urlAuth('signInWithPassword?'),
           body: json.encode({
-            "${responseData['localId']}": {
-              'localId': responseData['localId'],
-              'email': email,
-              'firstname': firstname,
-              'lastname': lastname,
-              'password': password,
-              'admin': {'admin': isAdmin},
-              'allowedInApp': {'allowedInApp': isAllowedInApp},
-              'online': {'online': false},
-              'loginDetails': {'init': true},
-            },
+            "email": adminEmail,
+            "password": adminPassword,
+            "returnSecureToken": true,
           }));
+      _token =
+          (json.decode(res.body) as Map<String, dynamic>)['idToken'] as String;
+
+      await http
+          .patch(Uri.parse('$firebaseUrl/users.json?auth=$token'),
+              body: json.encode({
+                "${responseData['localId']}": {
+                  'localId': responseData['localId'],
+                  'email': email,
+                  'firstname': firstname,
+                  'lastname': lastname,
+                  'password': password,
+                  'admin': {'admin': isNotAdmin},
+                  'allowedInApp': {'allowedInApp': isNotAllowedInApp},
+                  'online': {'online': false},
+                  'loginDetails': {'init': true},
+                },
+              }))
+          .then((_) => _token = null);
     }
     message = 'Welcome,\n$firstname $lastname';
     return message;
@@ -117,7 +128,8 @@ class FirebaseAuthenticationHandler with ChangeNotifier {
     _token = signInData.idToken;
     _expiresIn =
         DateTime.now().add(Duration(seconds: int.parse(signInData.expiresIn)));
-    final allUsers = await http.get(Uri.parse('$firebaseUrl/.json?auth=$token'));
+    final allUsers =
+        await http.get(Uri.parse('$firebaseUrl/.json?auth=$token'));
     final allUsersData = json.decode(allUsers.body) as Map<String, dynamic>;
 
     User? user;
@@ -134,7 +146,8 @@ class FirebaseAuthenticationHandler with ChangeNotifier {
           Provider.of<FirebaseUserData>(context, listen: false)
               .setLoggedInUser(user!);
           await http.patch(
-              Uri.parse('$firebaseUrl/users/${user!.localId}/online.json?auth=$token'),
+              Uri.parse(
+                  '$firebaseUrl/users/${user!.localId}/online.json?auth=$token'),
               body: json.encode({"online": true}));
           final prefs = await SharedPreferences.getInstance();
           if (prefs.containsKey(FirebaseUserData.prefName)) {
