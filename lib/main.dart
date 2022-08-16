@@ -26,7 +26,7 @@ class MyApp extends StatelessWidget {
   static const Color appSecondaryColor = Color(0xFFff6e40);
   static const Color appSecondaryColor2 = Color(0xFF000000);
 
-  static const Widget defaultScreen = LoginScreen();
+  static const Widget defaultScreen = LoginScreen( );
 
 
   @override

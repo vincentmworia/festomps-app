@@ -18,6 +18,14 @@ static  Container containerStyled =   Container(
     ),
   ),
 );
+static  Container containerLoading(double deviceHeight) =>     Container(
+  height: deviceHeight,
+  color: MyApp.appSecondaryColor2.withOpacity(0.75),
+  child: const Center(
+    child: CircularProgressIndicator(color: MyApp.appSecondaryColor),
+  ),
+);
+
   static Future<dynamic> showCustomDialog(
       BuildContext context, String message) async {
     return await showDialog(

@@ -7,7 +7,7 @@ class User {
   int admin;
   int allowedInApp;
   bool online;
-  List<dynamic> loginDetails;
+  Map<dynamic,dynamic> loginDetails;
 
   User({
     required this.localId,
@@ -30,18 +30,18 @@ class User {
         admin: user['admin'] as int,
         allowedInApp: user['allowedInApp'] as int,
         online: user['online'] as bool,
-        loginDetails: user['loginDetails'] as List<dynamic>,
+        loginDetails: user['loginDetails'] as Map<dynamic,dynamic>,
       );
 
-  Map<String, dynamic> toMap() => {
-        "localId": localId,
-        "email": email,
-        "firstname": firstName,
-        "lastname": lastName,
-        "password": password,
-        "admin": admin,
-        "allowedInApp": allowedInApp,
-        "online": online,
-        // "loginDetails": [addLoginDetails()],
-      };
+  // Map<String, dynamic> toMap() => {
+  //       "localId": localId,
+  //       "email": email,
+  //       "firstname": firstName,
+  //       "lastname": lastName,
+  //       "password": password,
+  //       "admin": admin,
+  //       "allowedInApp": allowedInApp,
+  //       "online": online,
+  //       // "loginDetails": [addLoginDetails()],
+  //     };
 }

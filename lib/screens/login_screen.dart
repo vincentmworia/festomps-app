@@ -137,7 +137,7 @@ class _LoginScreenState extends State<LoginScreen> {
             .then((message) => Custom.showCustomDialog(context, message));
       }
     } catch (error) {
-      const errorMessage = 'Failed,check the internet connection later';
+      const errorMessage = 'Failed, check the internet connection later';
       return Custom.showCustomDialog(context, errorMessage);
     } finally {
       setState(() {
@@ -151,11 +151,11 @@ class _LoginScreenState extends State<LoginScreen> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (_init) {
-      Future.delayed(Duration.zero)
-          .then((_) async =>
-              await Provider.of<FirebaseUserData>(context, listen: false)
-                  .switchValueInit())
-          .then((_) => setState(() => _init = false));
+      Future.delayed(Duration.zero).then((_) async {
+        final loggedUser =
+            Provider.of<FirebaseUserData>(context, listen: false);
+        await loggedUser.switchValueInit();
+      }).then((_) => setState(() => _init = false));
     }
   }
 

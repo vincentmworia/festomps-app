@@ -28,9 +28,12 @@ class FirebaseUserData with ChangeNotifier {
     }
   }
 
-  void setLoggedInUser(User usr) {
+  void setLoggedInUser(User? usr) {
     _loggedInUser = usr;
     notifyListeners();
+  }
+  void nullifyLoggedInUser( ) {
+    _loggedInUser =null;
   }
 
   Future<void> setSwitchValue(bool value, BuildContext context) async {

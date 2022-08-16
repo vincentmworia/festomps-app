@@ -9,6 +9,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../main.dart';
 import '../global_data.dart';
 import '../models/user.dart';
+import '../private_data.dart';
 import '../providers/firebase_user_data.dart';
 import '../widgets/custom_widgets.dart';
 
@@ -83,7 +84,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               idToken: widget.user.localId)
           .then((message) async {
         if (message == "UPDATE SUCCESSFUL") {
-          print('email updated');
           User usr = User(
               localId: widget.user.localId,
               email: _userEmailNew,
@@ -111,7 +111,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           }
 
           // update to firebase rtdb
-          final resp = await http.patch(FirebaseAuthenticationHandler.usersUrl,
+           await http.patch(Uri.parse(
+               '$firebaseUrl/users.json'),
               body: json.encode({
                 usr.localId: {
                   'localId': usr.localId,
@@ -125,7 +126,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   'loginDetails': usr.loginDetails,
                 },
               }));
-          print(json.decode(resp.body));
           Future.delayed(Duration.zero).then((_) async {
             await Custom.showCustomDialog(context, 'UPDATE SUCCESSFUL')
                 .then((_) => Navigator.pop(context));
@@ -174,9 +174,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     return SafeArea(
       child: Scaffold(
         appBar: AppBar(
-          title: Custom.titleText('EDIT PROFILE'),
+          backgroundColor:
+              _isLoading ? MyApp.appSecondaryColor2.withOpacity(0.75) : null,
+          title: Custom.titleText(_isLoading ?'':'EDIT PROFILE'),
           leading: _isLoading
-              ? Center()
+              ? const Center()
               : IconButton(
                   icon: Custom.icon(Icons.arrow_back, MyApp.appSecondaryColor),
                   onPressed: () => Navigator.pop(context),
@@ -425,6 +427,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     ),
                   ),
                 ),
+                if (_isLoading)
+                  Container(
+                    height: deviceHeight,
+                    color: MyApp.appSecondaryColor2.withOpacity(0.75),
+                  ),
               ],
             ),
           ),

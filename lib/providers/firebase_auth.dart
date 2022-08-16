@@ -9,17 +9,20 @@ import '../private_data.dart';
 import '../providers/firebase_user_data.dart';
 import '../models/signIn.dart';
 import '../models/user.dart';
+import '../screens/login_screen.dart';
 
 class FirebaseAuthenticationHandler with ChangeNotifier {
   static String? _token;
   static String? _expiresIn;
+  static DateTime? _loginTime;
+  static DateTime? _logoutTime;
+  static Duration? _loginDuration;
 
   String? get token => _token;
 
   // todo, token expire? force log out and reset preferences
   static Uri _urlAuth(String operation) => Uri.parse(
       'https://identitytoolkit.googleapis.com/v1/accounts:${operation}key=$webApiKey');
-  static final Uri usersUrl = Uri.parse('$firebaseUrl/users.json');
   static List<User>? otherUsers;
 
   static String getErrorMessage(String errorTitle) {
@@ -67,7 +70,7 @@ class FirebaseAuthenticationHandler with ChangeNotifier {
       message = getErrorMessage(responseData['error']['message']);
       return message;
     } else {
-      await http.patch(usersUrl,
+      await http.patch(Uri.parse('$firebaseUrl/users.json'),
           body: json.encode({
             "${responseData['localId']}": {
               'localId': responseData['localId'],
@@ -76,11 +79,9 @@ class FirebaseAuthenticationHandler with ChangeNotifier {
               'lastname': lastname,
               'password': password,
               'admin': isNotAdmin,
-              'allowedInApp': isNotAllowedInApp,
+              'allowedInApp': isAllowedInApp,
               'online': false,
-              'loginDetails': [
-                {'login': '', 'logout': ''},
-              ],
+              'loginDetails': {'init': true},
             },
           }));
     }
@@ -93,6 +94,7 @@ class FirebaseAuthenticationHandler with ChangeNotifier {
     required String email,
     required String password,
   }) async {
+    // todo if didn't log out, shared preferences force logout
     final response = await http.post(_urlAuth('signInWithPassword?'),
         body: json.encode({
           "email": email,
@@ -102,6 +104,7 @@ class FirebaseAuthenticationHandler with ChangeNotifier {
     String message;
     bool isAllowed = false;
     bool isPermitted = false;
+
     final responseData = json.decode(response.body) as Map<String, dynamic>;
 
     if (responseData['error'] != null) {
@@ -120,10 +123,10 @@ class FirebaseAuthenticationHandler with ChangeNotifier {
       if (userId == signInData.localId) {
         Provider.of<FirebaseUserData>(context, listen: false)
             .setLoggedInUser(user!);
-        if (user!.allowedInApp == isAllowedInApp ) {
+        if (user!.allowedInApp == isAllowedInApp) {
           isAllowed = true;
         }
-        if(allUsersData['appActive']==appActive) {
+        if (allUsersData['appActive'] == appActive) {
           isPermitted = true;
         }
       }
@@ -142,16 +145,14 @@ class FirebaseAuthenticationHandler with ChangeNotifier {
                 .setSwitchVal(false));
       }
     }
-  if(!isAllowed){
-      message ='User not authorized by admin to access the app';
-    }  else if(!isPermitted){
-      message ='SYSTEM IS OFF';
-    }else{
-      message ='Welcome';
+    if (!isAllowed) {
+      message = 'User not authorized by admin to access the app';
+    } else if (!isPermitted) {
+      message = 'SYSTEM IS OFF';
+    } else {
+      _loginTime = DateTime.now();
+      message = 'Welcome';
     }
-    message = isAllowed
-        ? 'Welcome'
-        : 'User not authorized by admin to access the app';
     return message;
   }
 
@@ -186,9 +187,6 @@ class FirebaseAuthenticationHandler with ChangeNotifier {
           "idToken": _token,
         }));
     final responseData = json.decode(response.body) as Map<String, dynamic>;
-
-    // todo delete fails here
-    print(responseData['error']);
     if (responseData['error'] != null) {
       message = getErrorMessage(responseData['error']['message']);
     } else {
@@ -196,4 +194,32 @@ class FirebaseAuthenticationHandler with ChangeNotifier {
     }
     return message;
   }
+
+  // todo logout
+  static Future<void> logout(BuildContext context) async {
+    _logoutTime = DateTime.now();
+    Map<String, String> loginDetailsCurrent = {
+      'login': _loginTime!.toIso8601String(),
+      'logout': _logoutTime!.toIso8601String(),
+    };
+    final loggedUser = Provider.of<FirebaseUserData>(context, listen: false);
+    await http
+        .post(
+            Uri.parse(
+                '$firebaseUrl/users/${loggedUser.loggedInUser!.localId}/loginDetails.json'),
+            body: json.encode(loginDetailsCurrent))
+        .then((_) {
+      _token = null;
+      _expiresIn = null;
+      _loginTime = null;
+      _logoutTime = null;
+      _loginDuration = null;
+      loggedUser.nullifyLoggedInUser();
+      Navigator.pushReplacementNamed(context, LoginScreen.routeName );
+    });
+  }
+
+// todo autoLogout
+//  if token expires,
+//  if after 10 minutes system is off
 }

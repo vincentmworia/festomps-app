@@ -82,28 +82,36 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         child: const Text('No')),
                     ElevatedButton(
                         onPressed: () async {
+                          Future.delayed(Duration.zero)
+                              .then((_) => Navigator.pop(context));
                           setState(() => _isLoading = true);
-                          final message = await FirebaseAuthenticationHandler
-                              .deleteAccount();
-                          if (message == "DELETE SUCCESSFUL") {
-                            Future.delayed(Duration.zero).then((_) async {
-                              // Clearr firebase
-                              Navigator.pop(context);
-                              await http.delete(Uri.parse(
-                                  '$firebaseUrl/users/${user.localId}.json'));
-                              // Clearr fingerprint
-                              final prefs =
-                                  await SharedPreferences.getInstance();
-                              prefs.remove(FirebaseUserData.prefName);
-                            }).then((_) => Navigator.pushReplacementNamed(
-                                context, LoginScreen.routeName));
-                          } else {
-                            Future.delayed(Duration.zero)
-                                .then((_) async =>
-                                    await Custom.showCustomDialog(
-                                        context, message))
-                                .then(
-                                    (_) => setState(() => _isLoading = false));
+                          try{
+                            final message = await FirebaseAuthenticationHandler
+                                .deleteAccount();
+
+                            if (message == "DELETE SUCCESSFUL") {
+                              Future.delayed(Duration.zero).then((_) async {
+                                await http.delete(Uri.parse(
+                                    '$firebaseUrl/users/${user.localId}.json'));
+                                final prefs =
+                                    await SharedPreferences.getInstance();
+                                prefs.remove(FirebaseUserData.prefName);
+                              }).then((_) =>
+                                  FirebaseAuthenticationHandler.logout(
+                                      context));
+                            } else {
+                              Future.delayed(Duration.zero)
+                                  .then((_) async =>
+                                      await Custom.showCustomDialog(
+                                          context, message))
+                                  .then((_) =>
+                                      setState(() => _isLoading = false));
+                            }
+                          }catch (error) {
+                            const errorMessage =
+                                'Failed, check the internet connection later';
+                            return await Custom.showCustomDialog(
+                                context, errorMessage);
                           }
                         },
                         child: const Text('Yes')),
@@ -122,18 +130,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final deviceHeight =
         MediaQuery.of(context).size.height - MediaQuery.of(context).padding.top;
     return SafeArea(
-        child: Scaffold(
-      key: scaffoldKey,
-      backgroundColor: Colors.white,
-      appBar: HomeScreen.appBar(scaffoldKey, 'MY PROFILE'),
-      drawer: const CustomDrawer(),
-      body: Container(
-        margin: const EdgeInsets.all(15.0),
-        height: deviceHeight,
-        width: double.infinity,
         child: Stack(
-          children: [
-            LayoutBuilder(builder: (context, constraints) {
+      children: [
+        Scaffold(
+          key: scaffoldKey,
+          backgroundColor: Colors.white,
+          appBar: HomeScreen.appBar(scaffoldKey, 'MY PROFILE'),
+          drawer: const CustomDrawer(),
+          body: Container(
+            margin: const EdgeInsets.all(15.0),
+            height: deviceHeight,
+            width: double.infinity,
+            child: LayoutBuilder(builder: (context, constraints) {
               return Column(
                 children: <Widget>[
                   _container(
@@ -213,14 +221,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ],
               );
             }),
-            if (_isLoading)
-              Container(
-                height: deviceHeight,
-                color: MyApp.appSecondaryColor2.withOpacity(0.75),
-              ),
-          ],
+          ),
         ),
-      ),
+        if (_isLoading)
+       Custom.containerLoading(deviceHeight),
+      ],
     ));
   }
 }
