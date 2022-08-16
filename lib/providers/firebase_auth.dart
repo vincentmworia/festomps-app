@@ -16,14 +16,12 @@ class FirebaseAuthenticationHandler with ChangeNotifier {
   static String? _expiresIn;
   static DateTime? _loginTime;
   static DateTime? _logoutTime;
-  static Duration? _loginDuration;
 
   String? get token => _token;
 
   // todo, token expire? force log out and reset preferences
   static Uri _urlAuth(String operation) => Uri.parse(
       'https://identitytoolkit.googleapis.com/v1/accounts:${operation}key=$webApiKey');
-  static List<User>? otherUsers;
 
   static String getErrorMessage(String errorTitle) {
     var message = 'Operation failed';
@@ -78,9 +76,9 @@ class FirebaseAuthenticationHandler with ChangeNotifier {
               'firstname': firstname,
               'lastname': lastname,
               'password': password,
-              'admin': isNotAdmin,
-              'allowedInApp': isAllowedInApp,
-              'online': false,
+              'admin': {'admin': isAdmin},
+              'allowedInApp': {'allowedInApp': isAllowedInApp},
+              'online': {'online': false},
               'loginDetails': {'init': true},
             },
           }));
@@ -114,37 +112,43 @@ class FirebaseAuthenticationHandler with ChangeNotifier {
     SignInData signInData = SignInData.fromMap(responseData);
     _token = signInData.idToken;
     _expiresIn = signInData.expiresIn;
+
     final allUsers = await http.get(Uri.parse('$firebaseUrl/.json'));
     final allUsersData = json.decode(allUsers.body) as Map<String, dynamic>;
-    otherUsers = [];
+
     User? user;
-    allUsersData['users'].forEach((userId, userData) {
+    (allUsersData['users'] as Map).forEach((userId, userData) async {
       user = User.fromMap(userData as Map<String, dynamic>);
       if (userId == signInData.localId) {
-        Provider.of<FirebaseUserData>(context, listen: false)
-            .setLoggedInUser(user!);
-        if (user!.allowedInApp == isAllowedInApp) {
+        if (user!.allowedInApp['allowedInApp'] == isAllowedInApp) {
           isAllowed = true;
         }
         if (allUsersData['appActive'] == appActive) {
           isPermitted = true;
         }
+        if (isAllowed && isPermitted) {
+          Provider.of<FirebaseUserData>(context, listen: false)
+              .setLoggedInUser(user!);
+         await http.patch(
+              Uri.parse('$firebaseUrl/users/${user!.localId}/online.json'),
+              body: json.encode({"online": true}));
+          final prefs = await SharedPreferences.getInstance();
+          if (prefs.containsKey(FirebaseUserData.prefName)) {
+            final fingerprintData =
+                json.decode(prefs.getString(FirebaseUserData.prefName)!)
+                    as Map<String, dynamic>;
+            if (email != fingerprintData['email'] as String) {
+              prefs.remove(FirebaseUserData.prefName);
+              Future.delayed(Duration.zero).then((_) =>
+                  Provider.of<FirebaseUserData>(context, listen: false)
+                      .setSwitchVal(false));
+
+            }
+          }
+        }
       }
-      otherUsers!.add(user!);
     });
 
-    final prefs = await SharedPreferences.getInstance();
-    if (prefs.containsKey(FirebaseUserData.prefName)) {
-      final fingerprintData =
-          json.decode(prefs.getString(FirebaseUserData.prefName)!)
-              as Map<String, dynamic>;
-      if (email != fingerprintData['email'] as String) {
-        prefs.remove(FirebaseUserData.prefName);
-        Future.delayed(Duration.zero).then((_) =>
-            Provider.of<FirebaseUserData>(context, listen: false)
-                .setSwitchVal(false));
-      }
-    }
     if (!isAllowed) {
       message = 'User not authorized by admin to access the app';
     } else if (!isPermitted) {
@@ -198,11 +202,16 @@ class FirebaseAuthenticationHandler with ChangeNotifier {
   // todo logout
   static Future<void> logout(BuildContext context) async {
     _logoutTime = DateTime.now();
+
     Map<String, String> loginDetailsCurrent = {
       'login': _loginTime!.toIso8601String(),
-      'logout': _logoutTime!.toIso8601String(),
+      'logout': _logoutTime!.toIso8601String()
     };
     final loggedUser = Provider.of<FirebaseUserData>(context, listen: false);
+     await http.patch(
+        Uri.parse(
+            '$firebaseUrl/users/${loggedUser.loggedInUser!.localId}/online.json'),
+        body: json.encode({"online": false}));
     await http
         .post(
             Uri.parse(
@@ -213,9 +222,8 @@ class FirebaseAuthenticationHandler with ChangeNotifier {
       _expiresIn = null;
       _loginTime = null;
       _logoutTime = null;
-      _loginDuration = null;
       loggedUser.nullifyLoggedInUser();
-      Navigator.pushReplacementNamed(context, LoginScreen.routeName );
+      Navigator.pushReplacementNamed(context, LoginScreen.routeName);
     });
   }
 

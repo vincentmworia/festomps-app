@@ -209,7 +209,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       height: constraints.maxHeight * 0.12,
                       child: Center(
                           child: FittedBox(
-                        child: Custom.titleText(user.admin == isAdmin
+                        child: Custom.titleText(user.admin['admin'] == isAdmin
                             ? 'ADMINISTRATOR'
                             : 'NOT ADMIN'),
                       ))),

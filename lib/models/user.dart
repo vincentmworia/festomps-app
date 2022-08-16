@@ -4,10 +4,10 @@ class User {
   final String firstName;
   final String lastName;
   final String password;
-  int admin;
-  int allowedInApp;
-  bool online;
-  Map<dynamic,dynamic> loginDetails;
+  Map<String, dynamic> admin;
+  Map<String, dynamic> allowedInApp;
+  Map<String, dynamic> online;
+  Map<dynamic, dynamic> loginDetails;
 
   User({
     required this.localId,
@@ -27,21 +27,21 @@ class User {
         firstName: user['firstname'] as String,
         lastName: user['lastname'] as String,
         password: user['password'] as String,
-        admin: user['admin'] as int,
-        allowedInApp: user['allowedInApp'] as int,
-        online: user['online'] as bool,
-        loginDetails: user['loginDetails'] as Map<dynamic,dynamic>,
+        admin: user['admin'] as Map<String,dynamic>,
+        allowedInApp: user['allowedInApp'] as Map<String,dynamic>,
+        online: user['online'] as Map<String,dynamic>,
+        loginDetails: user['loginDetails'] as Map<dynamic, dynamic>,
       );
 
-  // Map<String, dynamic> toMap() => {
-  //       "localId": localId,
-  //       "email": email,
-  //       "firstname": firstName,
-  //       "lastname": lastName,
-  //       "password": password,
-  //       "admin": admin,
-  //       "allowedInApp": allowedInApp,
-  //       "online": online,
-  //       // "loginDetails": [addLoginDetails()],
-  //     };
+// Map<String, dynamic> toMap() => {
+//       "localId": localId,
+//       "email": email,
+//       "firstname": firstName,
+//       "lastname": lastName,
+//       "password": password,
+//       "admin": admin,
+//       "allowedInApp": allowedInApp,
+//       "online": online,
+//       // "loginDetails": [addLoginDetails()],
+//     };
 }

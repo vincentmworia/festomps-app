@@ -20,7 +20,7 @@ static  Container containerStyled =   Container(
 );
 static  Container containerLoading(double deviceHeight) =>     Container(
   height: deviceHeight,
-  color: MyApp.appSecondaryColor2.withOpacity(0.75),
+  color: MyApp.appPrimaryColor.withOpacity(0.75),
   child: const Center(
     child: CircularProgressIndicator(color: MyApp.appSecondaryColor),
   ),

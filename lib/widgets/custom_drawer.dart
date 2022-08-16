@@ -9,7 +9,6 @@ import '../models/user.dart';
 import '../screens/about_screen.dart';
 import '../screens/home_screen.dart';
 import '../screens/profile_screen.dart';
-import '../screens/login_screen.dart';
 import '../providers/firebase_user_data.dart';
 import './custom_widgets.dart';
 
@@ -96,7 +95,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
                 ),
                 if (Provider.of<FirebaseUserData>(context)
                         .loggedInUser!
-                        .admin ==
+                        .admin['admin'] ==
                     isAdmin)
                   _buildDrawer(
                     icon: Custom.icon(
@@ -109,15 +108,41 @@ class _CustomDrawerState extends State<CustomDrawer> {
                   icon: Custom.icon(Icons.logout, MyApp.appPrimaryColor),
                   title: 'Logout',
                   onTap: () async {
-                    setState(() => _isLoading = true);
-                    try {
-                      await FirebaseAuthenticationHandler.logout(context);
-                    } catch (error) {
-                      const errorMessage =
-                          'Failed, check the internet connection later';
-                      return await Custom.showCustomDialog(
-                          context, errorMessage);
-                    }
+                    await showDialog(
+                        context: context,
+                        builder: (ctx) => AlertDialog(
+                              content: Custom.normalText(
+                                  '${user.firstName}, are you sure you want to logout?'),
+                              actions: [
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceEvenly,
+                                  children: [
+                                    ElevatedButton(
+                                        onPressed: () {
+                                          Navigator.pop(context);
+                                        },
+                                        child: const Text('No')),
+                                    ElevatedButton(
+                                        onPressed: () async {
+                                          Navigator.pop(context);
+                                          setState(() => _isLoading = true);
+                                          try {
+                                            await FirebaseAuthenticationHandler
+                                                .logout(context);
+                                          } catch (error) {
+                                            const errorMessage =
+                                                'Failed, check the internet connection later';
+                                            return await Custom
+                                                .showCustomDialog(
+                                                    context, errorMessage);
+                                          }
+                                        },
+                                        child: const Text('Yes')),
+                                  ],
+                                )
+                              ],
+                            ));
                   },
                 ),
               ],

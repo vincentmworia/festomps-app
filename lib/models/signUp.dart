@@ -13,13 +13,10 @@ class SignUpData {
     required this.localId,
   });
 
-
-  static SignUpData fromMap(Map<String, dynamic> signUpData) =>
-      SignUpData(idToken: signUpData ['idToken'],
-          email: signUpData['email'],
-          refreshToken: signUpData['refreshToken'],
-          expiresIn: signUpData['expiresIn'],
-          localId: signUpData ['localId']);
-
-
+  static SignUpData fromMap(Map<String, dynamic> signUpData) => SignUpData(
+      idToken: signUpData['idToken'],
+      email: signUpData['email'],
+      refreshToken: signUpData['refreshToken'],
+      expiresIn: signUpData['expiresIn'],
+      localId: signUpData['localId']);
 }
