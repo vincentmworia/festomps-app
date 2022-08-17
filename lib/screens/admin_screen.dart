@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:festomps/providers/firebase_auth.dart';
 import 'package:festomps/screens/home_screen.dart';
 import 'package:festomps/widgets/admin_allow_users.dart';
+import 'package:festomps/widgets/admin_other_users.dart';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -44,21 +45,45 @@ class _AdminScreenState extends State<AdminScreen> {
     return otherUsers;
   }
 
-  Future<void> _allowUser(bool addUser, Admin user) async {
+  Future<void> _allowUser(int addUser, Admin user) async {
     setState(() => _isLoading = true);
-    if (addUser) {
+    if (addUser == 1) {
       await http
           .patch(
               Uri.parse(
                   '$firebaseUrl/users/${user.localId}/allowedInApp.json?auth=${FirebaseAuthenticationHandler.token}'),
               body: json.encode({'allowedInApp': isAllowedInApp}))
           .then((_) => setState(() => _isLoading = false));
-    } else {
+    } else if (addUser == 2) {
+      // make allowed in app false
+      await http
+          .patch(
+              Uri.parse(
+                  '$firebaseUrl/users/${user.localId}/allowedInApp.json?auth=${FirebaseAuthenticationHandler.token}'),
+              body: json.encode({'allowedInApp': isNotAllowedInApp}))
+          .then((_) => setState(() => _isLoading = false));
+    } else if (addUser == 3) {
+      // make user admin
+      await http
+          .patch(
+              Uri.parse(
+                  '$firebaseUrl/users/${user.localId}/admin.json?auth=${FirebaseAuthenticationHandler.token}'),
+              body: json.encode({'admin': isAdmin}))
+          .then((_) => setState(() => _isLoading = false));
+    } else if (addUser == 4) {
+      // remove user admin
+      await http
+          .patch(
+              Uri.parse(
+                  '$firebaseUrl/users/${user.localId}/admin.json?auth=${FirebaseAuthenticationHandler.token}'),
+              body: json.encode({'admin': isNotAdmin}))
+          .then((_) => setState(() => _isLoading = false));
+    } else if (addUser == 0) {
       await http
           .delete(Uri.parse(
               '$firebaseUrl/users/${user.localId}.json?auth=${FirebaseAuthenticationHandler.token}'))
           .then((value) => setState(() => _isLoading = false));
-    }
+    } else {}
   }
 
   @override
@@ -79,7 +104,7 @@ class _AdminScreenState extends State<AdminScreen> {
     final deviceHeight =
         MediaQuery.of(context).size.height - MediaQuery.of(context).padding.top;
     // final List<Admin> onlineUsersList = [];
-    final List<Admin> allUsersList = [];
+    final List<Admin> otherUsersList = [];
     final List<Admin> allowUsersList = [];
     return SafeArea(
       child: Scaffold(
@@ -95,7 +120,7 @@ class _AdminScreenState extends State<AdminScreen> {
                     return Custom.containerLoading(deviceHeight);
                   }
                   // i++;
-                  allUsersList.clear();
+                  otherUsersList.clear();
                   allowUsersList.clear();
                   // onlineUsersList.clear();
 
@@ -149,29 +174,23 @@ class _AdminScreenState extends State<AdminScreen> {
                         loginData: loginData);
                     if (!newUser.allowedInApp) {
                       allowUsersList.add(newUser);
+                    } else {
+                      otherUsersList.add(newUser);
                     }
-                    allUsersList.add(newUser);
                   }
 
                   return SingleChildScrollView(
-                    child: Column(
-                      children: [
-                        // Custom.titleText('\nONLINE USERS'),
-                        // ...onlineUsersList.map((e) => Text(e.email)).toList(),
-                        if (allowUsersList.isNotEmpty)
-                          AdminAllowUsers(allowUsersList, _allowUser),
-                        Custom.titleText('\nALL USERS'),
-                        ...allUsersList.map((Admin user) => Text('''
-                email\t${user.email}:{
-                First Name\t${user.firstName},
-                Last Name\t${user.lastName},
-                online\t${user.online},
-                allowed in\t${user.allowedInApp},
-                admin priv\t${user.admin},
-                id\t${user.localId},
-                LoginData\t${user.loginData},} 
-                ''')).toList(),
-                      ],
+                    child: SizedBox(
+                      height: deviceHeight * 0.9,
+                      child: Column(
+                        children: [
+                          if (allowUsersList.isNotEmpty)
+                            AdminAllowUsers(allowUsersList, _allowUser),
+                          Expanded(
+                              child:
+                                  AdminOtherUsers(otherUsersList, _allowUser)),
+                        ],
+                      ),
                     ),
                   );
                 }),
