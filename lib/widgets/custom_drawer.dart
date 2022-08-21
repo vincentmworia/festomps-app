@@ -7,7 +7,7 @@ import '../providers/firebase_auth.dart';
 import '../screens/admin_screen.dart';
 import '../models/user.dart';
 import '../screens/about_screen.dart';
-import '../screens/home_screen.dart';
+import '../screens/mqtt_home_screen/mqtt_root_screen.dart';
 import '../screens/profile_screen.dart';
 import '../providers/firebase_user_data.dart';
 import './custom_widgets.dart';
@@ -78,7 +78,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
                   icon: Custom.icon(Icons.home, MyApp.appPrimaryColor),
                   title: 'HOME',
                   onTap: () => Navigator.pushReplacementNamed(
-                      context, HomeScreen.routeName),
+                      context, MainHome.routeName),
                 ),
                 _buildDrawer(
                   icon:

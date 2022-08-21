@@ -6,7 +6,6 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../private_data.dart';
-import './home_screen.dart';
 import '../main.dart';
 import '../widgets/custom_drawer.dart';
 import '../widgets/custom_widgets.dart';
@@ -25,6 +24,7 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   var _isLoading = false;
+
 
   Card _container(
           {required double width,
@@ -121,9 +121,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ));
   }
 
+  final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
   @override
   Widget build(BuildContext context) {
-    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
     final borderRadius = BorderRadius.circular(35.0);
     final Size bnSize = Size(MediaQuery.of(context).size.width / 1.8, 55);
     final User user = Provider.of<FirebaseUserData>(context).loggedInUser!;
@@ -135,7 +135,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         Scaffold(
           key: scaffoldKey,
           backgroundColor: Colors.white,
-          appBar: HomeScreen.appBar(scaffoldKey, 'MY PROFILE'),
+          appBar: Custom.appBar(scaffoldKey, 'MY PROFILE'),
           drawer: const CustomDrawer(),
           body: Container(
             margin: const EdgeInsets.all(15.0),

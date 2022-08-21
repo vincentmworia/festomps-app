@@ -4,27 +4,37 @@ import '../main.dart';
 
 class Custom {
   static String loadingText = '...';
-static  Container containerStyled =   Container(
-  decoration: BoxDecoration(
-    gradient: LinearGradient(
-      colors: [
-        MyApp.appPrimaryColor.withOpacity(0.5),
-        MyApp.appSecondaryColor.withOpacity(0.5),
-        MyApp.appSecondaryColor2.withOpacity(0.5),
-      ],
-      begin: Alignment.topLeft,
-      end: Alignment.bottomRight,
-      stops: const [0, 1, 3],
+  static Container containerStyled = Container(
+    decoration: BoxDecoration(
+      gradient: LinearGradient(
+        colors: [
+          MyApp.appPrimaryColor.withOpacity(0.5),
+          MyApp.appSecondaryColor.withOpacity(0.5),
+          MyApp.appSecondaryColor2.withOpacity(0.5),
+        ],
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        stops: const [0, 1, 3],
+      ),
     ),
-  ),
-);
-static  Container containerLoading(double deviceHeight) =>     Container(
-  height: deviceHeight,
-  color: MyApp.appPrimaryColor.withOpacity(0.75),
-  child: const Center(
-    child: CircularProgressIndicator(color: MyApp.appSecondaryColor),
-  ),
-);
+  );
+
+  static Container containerLoading(double deviceHeight) => Container(
+        height: deviceHeight,
+        color: MyApp.appPrimaryColor.withOpacity(0.75),
+        child: const Center(
+          child: CircularProgressIndicator(color: MyApp.appSecondaryColor),
+        ),
+      );
+
+  static AppBar appBar(GlobalKey<ScaffoldState> scaffoldKey, String title) =>
+      AppBar(
+        title: titleText(title),
+        leading: IconButton(
+          icon: icon(Icons.menu, MyApp.appSecondaryColor),
+          onPressed: () => scaffoldKey.currentState?.openDrawer(),
+        ),
+      );
 
   static Future<dynamic> showCustomDialog(
       BuildContext context, String message) async {

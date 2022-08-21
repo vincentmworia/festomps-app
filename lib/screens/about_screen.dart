@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../main.dart';
 import '../widgets/custom_drawer.dart';
-import './home_screen.dart';
+import '../widgets/custom_widgets.dart';
 
 class AboutScreen extends StatelessWidget {
   const AboutScreen({Key? key}) : super(key: key);
@@ -49,7 +49,7 @@ class AboutScreen extends StatelessWidget {
     return SafeArea(
         child: Scaffold(
       key: scaffoldKey,
-      appBar: HomeScreen.appBar(scaffoldKey, 'ABOUT'),
+      appBar: Custom.appBar(scaffoldKey, 'ABOUT'),
       drawer: const CustomDrawer(),
       body: Padding(
           padding: const EdgeInsets.fromLTRB(30.0, 10.0, 30.0, 5.0),

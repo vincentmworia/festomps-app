@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:festomps/providers/firebase_auth.dart';
-import 'package:festomps/screens/home_screen.dart';
 import 'package:festomps/widgets/admin_allow_users.dart';
 import 'package:festomps/widgets/admin_other_users.dart';
 
@@ -21,7 +20,7 @@ class AdminScreen extends StatefulWidget {
   static const routeName = '/admin_screen';
 
   static String formatDate(DateTime time) =>
-      DateFormat('dd/MM/yyyy hh:mm').format(time);
+      DateFormat('dd/MM/yyyy HH:MM').format(time);
 
   @override
   State<AdminScreen> createState() => _AdminScreenState();
@@ -83,7 +82,7 @@ class _AdminScreenState extends State<AdminScreen> {
           .delete(Uri.parse(
               '$firebaseUrl/users/${user.localId}.json?auth=${FirebaseAuthenticationHandler.token}'))
           .then((value) => setState(() => _isLoading = false));
-    } else {}
+    }
   }
 
   @override
@@ -109,7 +108,7 @@ class _AdminScreenState extends State<AdminScreen> {
     return SafeArea(
       child: Scaffold(
         key: scaffoldKey,
-        appBar: _isLoading ? null : HomeScreen.appBar(scaffoldKey, 'Admin'),
+        appBar: Custom.appBar(scaffoldKey, 'Admin'),
         drawer: const CustomDrawer(),
         body: _isLoading
             ? Custom.containerLoading(deviceHeight)
@@ -152,7 +151,7 @@ class _AdminScreenState extends State<AdminScreen> {
                       } else if (timeInHrs == '0') {
                         duration = '$timeInMin min';
                       } else {
-                        '$timeInHrs hrs';
+                        '$timeInHrs hrs $timeInMin min';
                       }
 
                       loginData.add({
@@ -161,6 +160,7 @@ class _AdminScreenState extends State<AdminScreen> {
                         'duration': duration,
                       });
                     }
+
                     final newUser = Admin(
                         localId: user.localId,
                         email: user.email,

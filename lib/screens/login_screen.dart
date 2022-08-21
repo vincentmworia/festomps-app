@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:festomps/screens/mqtt_home_screen/mqtt_root_screen.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:local_auth/local_auth.dart';
@@ -7,7 +8,6 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../providers/firebase_auth.dart';
-import './home_screen.dart';
 import '../providers/firebase_user_data.dart';
 import '../global_data.dart';
 import '../enum.dart';
@@ -104,7 +104,7 @@ class _LoginScreenState extends State<LoginScreen> {
             context: context, email: email, password: password)
         .then((message) {
       if (message == 'Welcome') {
-        Navigator.pushReplacementNamed(context, HomeScreen.routeName);
+        Navigator.pushReplacementNamed(context, MainHome.routeName);
       } else {
         Custom.showCustomDialog(context, message);
       }

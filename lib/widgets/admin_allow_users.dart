@@ -21,7 +21,7 @@ class _AdminAllowUsersState extends State<AdminAllowUsers> {
   @override
   void initState() {
     super.initState();
-    _pageController = PageController(initialPage: 1, viewportFraction: 0.85);
+    _pageController = PageController(initialPage: 200, viewportFraction: 0.83);
   }
 
   @override
@@ -53,11 +53,7 @@ class _AdminAllowUsersState extends State<AdminAllowUsers> {
         var value = 1.0;
         if (_pageController.position.haveDimensions) {
           value = _pageController.page! - index;
-          // print('Index:\t${index.toString()}');
-          // print('Page Controller:\t${pageController.page.toString()}');
-
           value = (1 - (value.abs() * 0.3)).clamp(0.0, 1.0);
-          // print(value);
         }
         return Center(
             child: SizedBox(
@@ -158,6 +154,7 @@ class _AdminAllowUsersState extends State<AdminAllowUsers> {
                           Navigator.pop(context);
                           widget.allowUser(operation == true ? 1 : 0, user);
                         },
+
                         child: const Text('Yes')),
                   ],
                 )

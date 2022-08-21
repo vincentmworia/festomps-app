@@ -1,13 +1,15 @@
 import 'dart:convert';
 
+import 'package:festomps/providers/activate_button.dart';
 import 'package:festomps/providers/firebase_auth.dart';
+import 'package:festomps/providers/mqtt_provider.dart';
+import 'package:festomps/screens/mqtt_home_screen/mqtt_root_screen.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import './providers/firebase_user_data.dart';
 import './screens/login_screen.dart';
-import './screens/home_screen.dart';
 import './screens/profile_screen.dart';
 import './screens/about_screen.dart';
 import './screens/admin_screen.dart';
@@ -26,13 +28,14 @@ class MyApp extends StatelessWidget {
   static const Color appSecondaryColor = Color(0xFFff6e40);
   static const Color appSecondaryColor2 = Color(0xFF000000);
 
-  static const Widget defaultScreen = LoginScreen( );
-
+  static const Widget defaultScreen = LoginScreen();
 
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
+        ChangeNotifierProvider(create: (_) => ActivateBn()),
+        ChangeNotifierProvider(create: (_) => MqttProvider()),
         ChangeNotifierProvider(create: (_) => FirebaseUserData()),
         ChangeNotifierProvider(create: (_) => FirebaseAuthenticationHandler()),
       ],
@@ -66,7 +69,7 @@ class MyApp extends StatelessWidget {
         // todo after 1hr check whether app is active
         home: defaultScreen,
         routes: {
-          HomeScreen.routeName: (_) => const HomeScreen(),
+          MainHome.routeName: (_) => const MainHome(),
           ProfileScreen.routeName: (_) => const ProfileScreen(),
           AboutScreen.routeName: (_) => const AboutScreen(),
           AdminScreen.routeName: (_) => const AdminScreen(),
