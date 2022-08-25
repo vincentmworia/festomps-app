@@ -5,8 +5,8 @@ import '../../enum.dart';
 import '../../main.dart';
 import '../../widgets/custom_drawer.dart';
 import '../../widgets/custom_widgets.dart';
-import '../../widgets/monitor_panel/image_view.dart';
-import '../../widgets/monitor_panel/stepper_view.dart';
+import 'image_view.dart';
+import 'stepper_view.dart';
 
 class FestoMpsScreen extends StatefulWidget {
   const FestoMpsScreen({Key? key}) : super(key: key);
@@ -36,22 +36,21 @@ class _FestoMpsScreenState extends State<FestoMpsScreen> {
         preferPosition: AutoScrollPosition.begin);
     // controller.highlight(counter);
   }
-Widget _workpieceView(height)=>
-    SizedBox(
-      height:height ,
-      child: Row(
-        mainAxisAlignment:
-        MainAxisAlignment.spaceAround,
-        crossAxisAlignment:
-        CrossAxisAlignment.center,
-        children: [
-          _colorTitle('1', Colors.grey),
-          _colorTitle('25', Colors.red),
-          _colorTitle('173', Colors.black),
-          _colorTitle('176', MyApp.appPrimaryColor),
-        ],
-      ),
-    );
+
+  Widget _workpieceView(height) => SizedBox(
+        height: height,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            _colorTitle(_wpMetallic.toString(), Colors.grey),
+            _colorTitle(_wpRed.toString(), Colors.red),
+            _colorTitle(_wpBlack.toString(), Colors.black),
+            _colorTitle(_wpTotal.toString(), MyApp.appPrimaryColor),
+          ],
+        ),
+      );
+
   Widget _topic(String title, int ctr) => SizedBox(
         height: 35,
         child: InkWell(
@@ -83,9 +82,10 @@ Widget _workpieceView(height)=>
         ),
       );
 
-  Widget _bn(String title) => InkWell(
+  Widget _bn(String title, String station) => InkWell(
         onTap: () {
           print(title);
+          print(station);
         },
         child: Container(
           width: 140,
@@ -96,7 +96,11 @@ Widget _workpieceView(height)=>
           ),
           child: Center(
               child: Text(
-            title,
+            station == _distribution
+                ? '$title DIST'
+                : station == _sorting
+                    ? '$title SORT'
+                    : '$title ALL',
             style: const TextStyle(color: Colors.white),
           )),
         ),
@@ -113,16 +117,203 @@ Widget _workpieceView(height)=>
                 borderRadius: BorderRadius.circular(30)),
             child: child),
       );
-  late int _currentStepAll;
-  late int _currentStepDist;
-  late int _currentStepSort;
-  late Workpiece _workpieceAll;
-  late Workpiece _workpieceSort;
+
+  final String _distribution = "DISTRIBUTION";
+  final String _sorting = "SORTING";
+  final String _all = "ALL";
+
+  Widget _stationDisplay(
+    String stationName,
+    double height,
+  ) =>
+      AutoScrollTag(
+        key: ValueKey(stationName),
+        controller: controller,
+        index: stationName == _distribution
+            ? 1
+            : stationName == _sorting
+                ? 2
+                : 0,
+        highlightColor: Colors.black,
+        child: Column(
+          children: [
+            SizedBox(
+              height: height * 0.085,
+              child: Center(
+                  child: Custom.titleText(
+                      stationName == _all ? 'ALL STATIONS' : stationName)),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(8),
+              child: SizedBox(
+                height: height * 0.9,
+                child: LayoutBuilder(builder: (context, constraints) {
+                  final containerWidth = constraints.maxWidth;
+                  final containerHeight = constraints.maxHeight;
+                  return Column(
+                    children: [
+                      _cardView(
+                          containerHeight * 0.425,
+                          Stack(
+                            children: [
+                              if (_viewMode == ViewMode.stepper)
+                                Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: stationName == _distribution
+                                        ? StepperView(
+                                            _distCurrentStep,
+                                            Station.distribution,
+                                            _sortWorkpieceName)
+                                        : stationName == _sorting
+                                            ? StepperView(
+                                                _sortCurrentStep,
+                                                Station.sorting,
+                                                _sortWorkpieceName)
+                                            : StepperView(
+                                                _allCurrentStep,
+                                                Station.all,
+                                                _sortWorkpieceName))
+                              else
+                                Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: stationName == _distribution
+                                      ? ImageView(
+                                          _distCurrentStep,
+                                          Station.distribution,
+                                          _sortWorkpieceName,
+                                          containerWidth,
+                                          containerHeight)
+                                      : stationName == _sorting
+                                          ? ImageView(
+                                              _sortCurrentStep,
+                                              Station.sorting,
+                                              _sortWorkpieceName,
+                                              containerWidth,
+                                              containerHeight)
+                                          : ImageView(
+                                              _allCurrentStep,
+                                              Station.all,
+                                              _sortWorkpieceName,
+                                              containerWidth,
+                                              containerHeight),
+                                ),
+                              GestureDetector(
+                                onDoubleTap: () {
+                                  setState(
+                                    () => _viewMode == ViewMode.stepper
+                                        ? _viewMode = ViewMode.image
+                                        : _viewMode = ViewMode.stepper,
+                                  );
+                                },
+                                child: Container(
+                                  width: double.infinity,
+                                  height: double.infinity,
+                                  decoration: const BoxDecoration(
+                                      // color: Colors.red,
+                                      borderRadius: BorderRadius.only(
+                                    topRight: Radius.circular(30),
+                                    topLeft: Radius.circular(30),
+                                  )),
+                                ),
+                              ),
+                            ],
+                          )),
+                      _workpieceView(containerHeight * 0.1),
+                      _cardView(
+                          containerHeight * 0.425,
+                          Container(
+                            height: containerHeight * 0.425,
+                            width: double.infinity,
+                            decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(30)),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceAround,
+                              children: [
+                                Column(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceEvenly,
+                                  children: [
+                                    _bn('START', stationName),
+                                    _bn('STOP', stationName),
+                                    _bn('RESET', stationName),
+                                  ],
+                                ),
+                                Column(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceEvenly,
+                                  children: [
+                                    Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        Custom.normalText('Power'),
+                                        Container(
+                                          width: 120,
+                                          height: 120,
+                                          decoration: BoxDecoration(
+                                            border: Border.all(
+                                                color: MyApp.appSecondaryColor),
+                                            shape: BoxShape.circle,
+                                            color: MyApp.appSecondaryColor
+                                                .withOpacity(_distStationPower
+                                                    ? 1
+                                                    : 0.1),
+                                          ),
+                                        )
+                                      ],
+                                    ),
+                                    // todo ROW OF MAN/AUTO STATE
+                                  ],
+                                ),
+                              ],
+                            ),
+                          )),
+                    ],
+                  );
+                }),
+              ),
+            ),
+          ],
+        ),
+      );
+  late int _allCurrentStep;
+  late int _distCurrentStep;
+  late int _sortCurrentStep;
+  late Workpiece _sortWorkpieceName;
+  late bool _allStationPower;
+  late bool _distStationPower;
+  late bool _sortStationPower;
+  late bool _distStationManAutoState;
+  late bool _sortStationManAutoState;
+  late int _distStationManAutoStep;
+  late int _sortStationManAutoStep;
+
+  late int _wpRed;
+  late int _wpBlack;
+  late int _wpMetallic;
+  late int _wpTotal;
 
   @override
   Widget build(BuildContext context) {
-    // final deviceHeight =
-    //     MediaQuery.of(context).size.height - MediaQuery.of(context).padding.top;
+    _allCurrentStep = 10;
+    _allStationPower = true;
+
+    _distCurrentStep = 4;
+    _distStationPower = true;
+    _distStationManAutoState = true;
+    _distStationManAutoStep = 3;
+
+    _sortStationPower = false;
+    _sortCurrentStep = 4;
+    _sortStationManAutoState = true;
+    _sortStationManAutoStep = 5;
+    _sortWorkpieceName = Workpiece.red;
+
+    _wpRed = 1;
+    _wpMetallic = 31;
+    _wpBlack = 234;
+    _wpTotal = 266;
+
     return SafeArea(
         child: Scaffold(
       backgroundColor: Colors.white,
@@ -147,381 +338,14 @@ Widget _workpieceView(height)=>
             ),
           ),
           Expanded(child: LayoutBuilder(builder: (context, constraints) {
-            // final width = constraints.maxWidth;
-            final height = constraints.maxHeight;
-            // final space = SizedBox(height: height * 0.1);
             return SingleChildScrollView(
               physics: const BouncingScrollPhysics(),
               scrollDirection: scrollDirection,
               controller: controller,
               child: Column(children: [
-                AutoScrollTag(
-                  key: const ValueKey('ALL'),
-                  controller: controller,
-                  index: 0,
-                  highlightColor: Colors.black,
-                  child: Column(
-                    children: [
-                      SizedBox(
-                        height: height * 0.085,
-                        child: Center(child: Custom.titleText('ALL STATIONS')),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8),
-                        child: SizedBox(
-                          height: height * 0.9,
-                          child: LayoutBuilder(builder: (context, constraints) {
-                            final containerWidth = constraints.maxWidth;
-                            final containerHeight = constraints.maxHeight;
-                            _currentStepAll = 10;
-                            _workpieceAll = Workpiece.red;
-                            return Column(
-                              children: [
-                                _cardView(
-                                    containerHeight * 0.425,
-                                    Stack(
-                                      children: [
-                                        if (_viewMode == ViewMode.stepper)
-                                          Padding(
-                                              padding:
-                                                  const EdgeInsets.all(8.0),
-                                              child: StepperView(
-                                                  _currentStepAll,
-                                                  Station.all,
-                                                  _workpieceAll))
-                                        else
-                                          Padding(
-                                            padding: const EdgeInsets.all(8.0),
-                                            child: ImageView(
-                                                _currentStepAll,
-                                                Station.all,
-                                                _workpieceAll,
-                                                containerWidth,
-                                                containerHeight),
-                                          ),
-                                        GestureDetector(
-                                          onDoubleTap: () {
-                                            setState(
-                                              () => _viewMode ==
-                                                      ViewMode.stepper
-                                                  ? _viewMode = ViewMode.image
-                                                  : _viewMode =
-                                                      ViewMode.stepper,
-                                            );
-                                          },
-                                          child: Container(
-                                            width: double.infinity,
-                                            height: double.infinity,
-                                            decoration: const BoxDecoration(
-                                                // color: Colors.red,
-                                                borderRadius: BorderRadius.only(
-                                              topRight: Radius.circular(30),
-                                              topLeft: Radius.circular(30),
-                                            )),
-                                          ),
-                                        ),
-                                      ],
-                                    )),
-                           _workpieceView(containerHeight * 0.1),
-                                _cardView(
-                                    containerHeight * 0.425,
-                                    Container(
-                                      height: containerHeight * 0.425,
-                                      width: double.infinity,
-                                      decoration: BoxDecoration(
-                                          borderRadius:
-                                              BorderRadius.circular(30)),
-                                      child:  Row(
-                                        mainAxisAlignment:
-                                        MainAxisAlignment.spaceAround,
-                                        children: [
-                                          Column(
-                                            mainAxisAlignment:
-                                            MainAxisAlignment.spaceEvenly,
-                                            children: [
-                                              _bn('START ALL'),
-                                              _bn('STOP ALL'),
-                                              _bn('RESET ALL'),
-                                            ],
-                                          ),
-                                          Column(
-                                            mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                            children: [
-                                              Custom.normalText('Power'),
-                                              Container(
-                                                width: 120,
-                                                height: 120,
-                                                decoration: BoxDecoration(
-                                                  border: Border.all(
-                                                      color: MyApp
-                                                          .appSecondaryColor),
-                                                  shape: BoxShape.circle,
-                                                  color: MyApp
-                                                      .appSecondaryColor
-                                                      .withOpacity(0.2),
-                                                ),
-                                              )
-                                            ],
-                                          ),
-                                        ],
-                                      ),
-                                    )),
-                              ],
-                            );
-                          }),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                AutoScrollTag(
-                  key: const ValueKey('DISTRIBUTION'),
-                  controller: controller,
-                  index: 1,
-                  // highlightColor: Colors.black ,
-                  child: Column(
-                    children: [
-                      SizedBox(
-                        height: height * 0.085,
-                        child: Center(
-                            child: Custom.titleText(
-                          'DISTRIBUTION',
-                        )),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8),
-                        child: SizedBox(
-                          height: height * 0.9,
-                          child: LayoutBuilder(builder: (context, constraints) {
-                            final containerWidth = constraints.maxWidth;
-                            final containerHeight = constraints.maxHeight;
-                            _currentStepDist = 4;
-
-                            return Column(
-                              children: [
-                                _cardView(
-                                    containerHeight * 0.425,
-                                    Stack(
-                                      children: [
-                                        if (_viewMode == ViewMode.stepper)
-                                          Padding(
-                                              padding:
-                                                  const EdgeInsets.all(8.0),
-                                              child: StepperView(
-                                                  _currentStepDist,
-                                                  Station.distribution,
-                                                  Workpiece.unknown))
-                                        else
-                                          Padding(
-                                            padding: const EdgeInsets.all(8.0),
-                                            child: ImageView(
-                                                _currentStepDist,
-                                                Station.distribution,
-                                                Workpiece.unknown,
-                                                containerWidth,
-                                                containerHeight),
-                                          ),
-                                        GestureDetector(
-                                          onDoubleTap: () {
-                                            setState(
-                                              () => _viewMode ==
-                                                      ViewMode.stepper
-                                                  ? _viewMode = ViewMode.image
-                                                  : _viewMode =
-                                                      ViewMode.stepper,
-                                            );
-                                          },
-                                          child: Container(
-                                            width: double.infinity,
-                                            height: double.infinity,
-                                            decoration: const BoxDecoration(
-                                                // color: Colors.red,
-                                                borderRadius: BorderRadius.only(
-                                              topRight: Radius.circular(30),
-                                              topLeft: Radius.circular(30),
-                                            )),
-                                          ),
-                                        ),
-                                      ],
-                                    )),
-
-                                _workpieceView(containerHeight * 0.1),
-                                _cardView(
-                                    containerHeight * 0.425,
-                                    Container(
-                                      height: containerHeight * 0.425,
-                                      width: double.infinity,
-                                      decoration: BoxDecoration(
-                                          borderRadius:
-                                              BorderRadius.circular(30)),
-                                      child: Row(
-                                        mainAxisAlignment:
-                                        MainAxisAlignment.spaceAround,
-                                        children: [
-                                          Column(
-                                            mainAxisAlignment:
-                                            MainAxisAlignment.spaceEvenly,
-                                            children: [
-                                              _bn('START ALL'),
-                                              _bn('STOP ALL'),
-                                              _bn('RESET ALL'),
-                                            ],
-                                          ),
-                                          Column(
-                                            mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                            children: [
-                                              Custom.normalText('Power'),
-                                              Container(
-                                                width: 120,
-                                                height: 120,
-                                                decoration: BoxDecoration(
-                                                  border: Border.all(
-                                                      color: MyApp
-                                                          .appSecondaryColor),
-                                                  shape: BoxShape.circle,
-                                                  color: MyApp
-                                                      .appSecondaryColor
-                                                      .withOpacity(0.2),
-                                                ),
-                                              )
-                                            ],
-                                          ),
-                                        ],
-                                      ),
-                                    )),
-                              ],
-                            );
-                          }),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                AutoScrollTag(
-                  key: const ValueKey('SORTING'),
-                  controller: controller,
-                  index: 2,
-                  // highlightColor: Colors.black,
-                  child: Column(
-                    children: [
-                      SizedBox(
-                        height: height * 0.085,
-                        child:
-                            Center(child: Custom.titleText('SORTING')),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8),
-                        child: SizedBox(
-                          height: height * 0.9,
-                          child: LayoutBuilder(builder: (context, constraints) {
-                            final containerWidth = constraints.maxWidth;
-                            final containerHeight = constraints.maxHeight;
-                            _currentStepSort = 14;
-                            _workpieceSort = Workpiece.red;
-
-                            return Column(
-                              children: [
-                                _cardView(
-                                    containerHeight * 0.425,
-                                    Stack(
-                                      children: [
-                                        if (_viewMode == ViewMode.stepper)
-                                          Padding(
-                                              padding:
-                                                  const EdgeInsets.all(8.0),
-                                              child: StepperView(
-                                                  _currentStepSort,
-                                                  Station.all,
-                                                  _workpieceSort))
-                                        else
-                                          Padding(
-                                            padding: const EdgeInsets.all(8.0),
-                                            child: ImageView(
-                                                _currentStepSort,
-                                                Station.all,
-                                                _workpieceSort,
-                                                containerWidth,
-                                                containerHeight),
-                                          ),
-                                        GestureDetector(
-                                          onDoubleTap: () {
-                                            setState(
-                                              () => _viewMode ==
-                                                      ViewMode.stepper
-                                                  ? _viewMode = ViewMode.image
-                                                  : _viewMode =
-                                                      ViewMode.stepper,
-                                            );
-                                          },
-                                          child: Container(
-                                            width: double.infinity,
-                                            height: double.infinity,
-                                            decoration: const BoxDecoration(
-                                                // color: Colors.red,
-                                                borderRadius: BorderRadius.only(
-                                              topRight: Radius.circular(30),
-                                              topLeft: Radius.circular(30),
-                                            )),
-                                          ),
-                                        ),
-                                      ],
-                                    )),
-
-                                _workpieceView(containerHeight * 0.1),
-                                _cardView(
-                                    containerHeight * 0.425,
-                                    Container(
-                                      height: containerHeight * 0.425,
-                                      width: double.infinity,
-                                      decoration: BoxDecoration(
-                                          borderRadius:
-                                              BorderRadius.circular(30)),
-                                      child:Row(
-                                        mainAxisAlignment:
-                                        MainAxisAlignment.spaceAround,
-                                        children: [
-                                          Column(
-                                            mainAxisAlignment:
-                                            MainAxisAlignment.spaceEvenly,
-                                            children: [
-                                              _bn('START ALL'),
-                                              _bn('STOP ALL'),
-                                              _bn('RESET ALL'),
-                                            ],
-                                          ),
-                                          Column(
-                                            mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                            children: [
-                                              Custom.normalText('Power'),
-                                              Container(
-                                                width: 120,
-                                                height: 120,
-                                                decoration: BoxDecoration(
-                                                  border: Border.all(
-                                                      color: MyApp
-                                                          .appSecondaryColor),
-                                                  shape: BoxShape.circle,
-                                                  color: MyApp
-                                                      .appSecondaryColor
-                                                      .withOpacity(0.2),
-                                                ),
-                                              )
-                                            ],
-                                          ),
-                                        ],
-                                      )
-                                    )),
-                              ],
-                            );
-                          }),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+                _stationDisplay(_all, constraints.maxHeight),
+                _stationDisplay(_distribution, constraints.maxHeight),
+                _stationDisplay(_sorting, constraints.maxHeight),
               ]),
             );
           }))

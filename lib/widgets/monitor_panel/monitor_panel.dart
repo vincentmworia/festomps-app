@@ -9,8 +9,8 @@ import 'package:provider/provider.dart';
 import '../../providers/mqtt_provider.dart';
 import '../custom_widgets.dart';
 import '../../enum.dart';
-import './image_view.dart';
-import './stepper_view.dart';
+import '../../screens/mqtt_home_screen/image_view.dart';
+import '../../screens/mqtt_home_screen/stepper_view.dart';
 
 class MonitorPanel extends StatefulWidget {
   const MonitorPanel(

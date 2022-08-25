@@ -77,7 +77,7 @@ class StepperView extends StatelessWidget {
                   (step) {
                     int id = int.parse((step['id'] as String));
                     id = id == 10 ? 0 : id;
-                    print(id);
+                    // print(id);
                     // print(id);
                     return Step(
                       state: (currentStep < id)
