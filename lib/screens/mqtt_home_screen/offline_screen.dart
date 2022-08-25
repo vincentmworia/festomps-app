@@ -5,8 +5,9 @@ import '../../widgets/custom_drawer.dart';
 import '../../widgets/custom_widgets.dart';
 
 class OfflineScreen extends StatelessWidget {
-  const OfflineScreen({Key? key}) : super(key: key);
-
+  const OfflineScreen({Key? key, required this.title, required this.color}) : super(key: key);
+final String title;
+final Color color;
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -17,11 +18,11 @@ class OfflineScreen extends StatelessWidget {
         ),
         drawer: const CustomDrawer(),
         body: Container(
-          color: MyApp.appSecondaryColor2.withOpacity(0.5),
-          child: const Center(
+          color:color.withOpacity(0.5),
+          child:  Center(
               child: Text(
-            'OFFLINE',
-            style: TextStyle(
+            title,
+            style: const TextStyle(
                 letterSpacing: 20.0, color: Colors.white, fontSize: 30.0),
           )),
         ),

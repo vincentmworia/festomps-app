@@ -1,10 +1,9 @@
 import 'dart:async';
 
 import 'package:festomps/providers/mqtt_provider.dart';
-import 'package:festomps/screens/mqtt_home_screen/festomps_screen.dart';
-import 'package:festomps/screens/mqtt_home_screen/home_screen.dart';
+import 'package:festomps/screens/mqtt_home_screen/festomps_screen.dart'
+    as festo;
 import 'package:festomps/screens/mqtt_home_screen/stations_screen.dart';
-import 'package:festomps/widgets/custom_drawer.dart';
 import 'package:flutter/material.dart';
 import 'package:mqtt_client/mqtt_server_client.dart';
 import 'package:provider/provider.dart';
@@ -15,6 +14,7 @@ import './offline_screen.dart';
 import './mqttfile.dart';
 import '../../enum.dart';
 
+// todo connectivity checker all through the app where the connectivity check is required
 class MainHome extends StatefulWidget {
   const MainHome({Key? key}) : super(key: key);
   static const routeName = '/main_home';
@@ -96,7 +96,10 @@ class _MainHomeState extends State<MainHome> {
   @override
   Widget build(BuildContext context) {
     return connStatus == Status.offline
-        ? const OfflineScreen()
-        : const FestoMpsScreen();
+        ? const OfflineScreen(
+            title: 'OFFLINE',
+            color: MyApp.appSecondaryColor2,
+          )
+        : const festo.FestoMpsScreen();
   }
 }

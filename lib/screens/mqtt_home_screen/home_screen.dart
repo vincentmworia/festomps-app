@@ -90,11 +90,6 @@ class _HomeScreenState extends State<HomeScreen> {
         MqttPublishPayload.bytesToStringAsString(recMess.payload.message);
         sortOn.sink.add(message);
       }
-      // if (c[0].topic == "WORKPIECE COUNT") {
-      //   final message =
-      //   MqttPublishPayload.bytesToStringAsString(recMess.payload.message);
-      //   sortWorkpieceNumber.sink.add(message);
-      // }
       if (c[0].topic == "SYSTEM ON ALL") {
         final message =
         MqttPublishPayload.bytesToStringAsString(recMess.payload.message);

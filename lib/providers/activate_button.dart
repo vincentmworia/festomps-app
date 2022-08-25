@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class ActivateBn with ChangeNotifier {
-  bool _activateBn = true;
+  bool _activateBn = false;
 
   bool get bnStatus => _activateBn;
 
