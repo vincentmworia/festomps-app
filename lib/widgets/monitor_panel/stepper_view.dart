@@ -4,27 +4,27 @@ import '../../enum.dart';
 import '../../monitor_data.dart';
 
 class StepperView extends StatelessWidget {
-  const StepperView(this.currentStep, this.stationName,
-      {Key? key})
+  const StepperView(this.currentStep, this.stationName, this.workpiece,{Key? key})
       : super(key: key);
   final int currentStep;
   final Station stationName;
+  final Workpiece workpiece;
 
   // int get stepCurrent => 250 + (60 * currentStep);
 
   @override
   Widget build(BuildContext context) {
     List<Map<String, String>> distributionSteps = distributionData();
-    List<Map<String, String>> sortingSteps = sortingData( );
-    List<Map<String, String>> allStationsSteps = allStationsData( );
+    List<Map<String, String>> sortingSteps = sortingData(workpiece);
+    List<Map<String, String>> allStationsSteps =
+        allStationsData(workpiece);
 
     return SingleChildScrollView(
       reverse: true,
       child: AnimatedContainer(
         alignment: Alignment.topCenter,
         duration: const Duration(milliseconds: 300),
-        height:
-        currentStep == 19
+        height: currentStep == 19
             ? 1650
             : currentStep == 18
                 ? 1480

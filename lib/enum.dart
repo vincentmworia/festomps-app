@@ -3,6 +3,10 @@ enum AuthenticationMode {
   signup,
 }
 
+enum ViewMode {
+  stepper,
+  image,
+}
 enum Station {
   distribution,
   sorting,

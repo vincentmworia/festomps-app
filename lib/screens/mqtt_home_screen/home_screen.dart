@@ -25,6 +25,7 @@ class _HomeScreenState extends State<HomeScreen> {
   StreamController sortManStep = StreamController();
   StreamController sortOn = StreamController();
   StreamController sortManMode = StreamController();
+  StreamController sortWorkpieceNumber = StreamController();
 
   StreamController allOn = StreamController();
   StreamController allCodeStep = StreamController();
@@ -33,7 +34,9 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
 
-    final client = Provider.of<MqttProvider>(context, listen: false).client;
+    final client = Provider
+        .of<MqttProvider>(context, listen: false)
+        .client;
     client.subscribe('#', MqttQos.atMostOnce);
 
     client.updates?.listen((List<MqttReceivedMessage<MqttMessage>> c) {
@@ -41,60 +44,69 @@ class _HomeScreenState extends State<HomeScreen> {
 
       if (c[0].topic == 'CODE STEP DISTRIBUTION') {
         final message =
-            MqttPublishPayload.bytesToStringAsString(recMess.payload.message);
+        MqttPublishPayload.bytesToStringAsString(recMess.payload.message);
         distCodeStep.sink.add(message);
       }
       if (c[0].topic == 'MANUAL STEP DISTRIBUTION') {
         final message =
-            MqttPublishPayload.bytesToStringAsString(recMess.payload.message);
+        MqttPublishPayload.bytesToStringAsString(recMess.payload.message);
         distManStep.sink.add(message);
       }
       if (c[0].topic == "MANUAL AUTO MODE DISTRIBUTION") {
         final message =
-            MqttPublishPayload.bytesToStringAsString(recMess.payload.message);
+        MqttPublishPayload.bytesToStringAsString(recMess.payload.message);
         distManMode.sink.add(message);
       }
       if (c[0].topic == "SYSTEM ON DISTRIBUTION") {
         final message =
-            MqttPublishPayload.bytesToStringAsString(recMess.payload.message);
+        MqttPublishPayload.bytesToStringAsString(recMess.payload.message);
         distOn.sink.add(message);
       }
 
       if (c[0].topic == 'CODE STEP SORTING') {
         final message =
-            MqttPublishPayload.bytesToStringAsString(recMess.payload.message);
+        MqttPublishPayload.bytesToStringAsString(recMess.payload.message);
         sortCodeStep.sink.add(message);
       }
       if (c[0].topic == 'CODE STEP ALL') {
         final message =
-            MqttPublishPayload.bytesToStringAsString(recMess.payload.message);
+        MqttPublishPayload.bytesToStringAsString(recMess.payload.message);
         allCodeStep.sink.add(message);
+        // todo add after filter
+        sortWorkpieceNumber.sink.add(message);
       }
       if (c[0].topic == 'MANUAL STEP SORTING') {
         final message =
-            MqttPublishPayload.bytesToStringAsString(recMess.payload.message);
+        MqttPublishPayload.bytesToStringAsString(recMess.payload.message);
         sortManStep.sink.add(message);
       }
       if (c[0].topic == "MANUAL AUTO MODE SORTING") {
         final message =
-            MqttPublishPayload.bytesToStringAsString(recMess.payload.message);
+        MqttPublishPayload.bytesToStringAsString(recMess.payload.message);
         sortManMode.sink.add(message);
       }
       if (c[0].topic == "SYSTEM ON SORTING") {
         final message =
-            MqttPublishPayload.bytesToStringAsString(recMess.payload.message);
+        MqttPublishPayload.bytesToStringAsString(recMess.payload.message);
         sortOn.sink.add(message);
       }
+      // if (c[0].topic == "WORKPIECE COUNT") {
+      //   final message =
+      //   MqttPublishPayload.bytesToStringAsString(recMess.payload.message);
+      //   sortWorkpieceNumber.sink.add(message);
+      // }
       if (c[0].topic == "SYSTEM ON ALL") {
         final message =
-            MqttPublishPayload.bytesToStringAsString(recMess.payload.message);
+        MqttPublishPayload.bytesToStringAsString(recMess.payload.message);
         allOn.sink.add(message);
       }
     });
     // todo request for first data
-    Provider.of<MqttProvider>(context, listen: false)
+    Provider
+        .of<MqttProvider>(context, listen: false)
         .mqttProtocol
         .publishMessage('REQUEST INIT', 'true');
+
   }
 
   @override
@@ -114,10 +126,11 @@ class _HomeScreenState extends State<HomeScreen> {
     allOn.close();
   }
 
-  Widget streamData(streamCtrl) => Container(
+  Widget streamData(streamCtrl) =>
+      Container(
         padding: const EdgeInsets.all(30.0),
         decoration:
-            BoxDecoration(border: Border.all(color: Colors.green, width: 2.0)),
+        BoxDecoration(border: Border.all(color: Colors.green, width: 2.0)),
         child: StreamBuilder(
             stream: streamCtrl.stream,
             builder: (context, snap) {
@@ -133,6 +146,14 @@ class _HomeScreenState extends State<HomeScreen> {
                 msg = 'no data';
               } else {
                 msg = data as String;
+
+                if (msg.contains(':')) {
+                  // msg.substring(msg.indexOf(':'),msg.indexOf(','));
+                  var codestepWp = msg.split(':');
+                  print('\n $codestepWp');
+                  print('CODE STEP: ${codestepWp[0]}');
+                  print('WORKPIECE: ${codestepWp[1]}');
+                }
               }
               return Text(
                 msg,
@@ -169,6 +190,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 streamData(sortManMode),
                 streamData(sortOn),
                 space,
+                streamData(sortWorkpieceNumber),
+                space,
                 streamData(allCodeStep),
                 streamData(allOn),
                 space,
@@ -177,11 +200,12 @@ class _HomeScreenState extends State<HomeScreen> {
                   child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
                           textStyle: const TextStyle(
-                        fontSize: 30.0,
-                      )),
+                            fontSize: 30.0,
+                          )),
                       onPressed: () {
                         print('pressed');
-                        Provider.of<MqttProvider>(context, listen: false)
+                        Provider
+                            .of<MqttProvider>(context, listen: false)
                             .mqttProtocol
                             .publishMessage('START DISTRIBUTION', 'true');
                       },
@@ -192,10 +216,11 @@ class _HomeScreenState extends State<HomeScreen> {
                   child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
                           textStyle: const TextStyle(
-                        fontSize: 30.0,
-                      )),
+                            fontSize: 30.0,
+                          )),
                       onPressed: () {
-                        Provider.of<MqttProvider>(context, listen: false)
+                        Provider
+                            .of<MqttProvider>(context, listen: false)
                             .mqttProtocol
                             .publishMessage('STOP DISTRIBUTION', 'true');
                       },
@@ -206,10 +231,11 @@ class _HomeScreenState extends State<HomeScreen> {
                   child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
                           textStyle: const TextStyle(
-                        fontSize: 30.0,
-                      )),
+                            fontSize: 30.0,
+                          )),
                       onPressed: () {
-                        Provider.of<MqttProvider>(context, listen: false)
+                        Provider
+                            .of<MqttProvider>(context, listen: false)
                             .mqttProtocol
                             .publishMessage('RESET DISTRIBUTION', 'true');
                       },
@@ -223,11 +249,12 @@ class _HomeScreenState extends State<HomeScreen> {
                   child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
                           textStyle: const TextStyle(
-                        fontSize: 30.0,
-                      )),
+                            fontSize: 30.0,
+                          )),
                       onPressed: () {
                         print('press');
-                        Provider.of<MqttProvider>(context, listen: false)
+                        Provider
+                            .of<MqttProvider>(context, listen: false)
                             .mqttProtocol
                             .publishMessage('START SORTING', 'true');
                       },
@@ -238,10 +265,11 @@ class _HomeScreenState extends State<HomeScreen> {
                   child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
                           textStyle: const TextStyle(
-                        fontSize: 30.0,
-                      )),
+                            fontSize: 30.0,
+                          )),
                       onPressed: () {
-                        Provider.of<MqttProvider>(context, listen: false)
+                        Provider
+                            .of<MqttProvider>(context, listen: false)
                             .mqttProtocol
                             .publishMessage('STOP SORTING', 'true');
                       },
@@ -252,10 +280,11 @@ class _HomeScreenState extends State<HomeScreen> {
                   child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
                           textStyle: const TextStyle(
-                        fontSize: 30.0,
-                      )),
+                            fontSize: 30.0,
+                          )),
                       onPressed: () {
-                        Provider.of<MqttProvider>(context, listen: false)
+                        Provider
+                            .of<MqttProvider>(context, listen: false)
                             .mqttProtocol
                             .publishMessage('RESET SORTING', 'true');
                       },
@@ -269,11 +298,12 @@ class _HomeScreenState extends State<HomeScreen> {
                   child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
                           textStyle: const TextStyle(
-                        fontSize: 30.0,
-                      )),
+                            fontSize: 30.0,
+                          )),
                       onPressed: () {
                         print('press');
-                        Provider.of<MqttProvider>(context, listen: false)
+                        Provider
+                            .of<MqttProvider>(context, listen: false)
                             .mqttProtocol
                             .publishMessage('START ALL', 'true');
                       },
@@ -284,10 +314,11 @@ class _HomeScreenState extends State<HomeScreen> {
                   child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
                           textStyle: const TextStyle(
-                        fontSize: 30.0,
-                      )),
+                            fontSize: 30.0,
+                          )),
                       onPressed: () {
-                        Provider.of<MqttProvider>(context, listen: false)
+                        Provider
+                            .of<MqttProvider>(context, listen: false)
                             .mqttProtocol
                             .publishMessage('STOP ALL', 'true');
                       },
@@ -298,10 +329,11 @@ class _HomeScreenState extends State<HomeScreen> {
                   child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
                           textStyle: const TextStyle(
-                        fontSize: 30.0,
-                      )),
+                            fontSize: 30.0,
+                          )),
                       onPressed: () {
-                        Provider.of<MqttProvider>(context, listen: false)
+                        Provider
+                            .of<MqttProvider>(context, listen: false)
                             .mqttProtocol
                             .publishMessage('RESET ALL', 'true');
                       },

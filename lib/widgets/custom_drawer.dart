@@ -1,3 +1,4 @@
+import 'package:festomps/screens/mqtt_home_screen/stations_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -77,8 +78,11 @@ class _CustomDrawerState extends State<CustomDrawer> {
                 _buildDrawer(
                   icon: Custom.icon(Icons.home, MyApp.appPrimaryColor),
                   title: 'HOME',
-                  onTap: () => Navigator.pushReplacementNamed(
-                      context, MainHome.routeName),
+
+                  // onTap: () => Navigator.pushReplacement (
+                  //     context, MainHome.routeName),
+                  onTap: () => Navigator.pushReplacement (
+                      context, MaterialPageRoute(builder: (_)=>const MainHome())),
                 ),
                 _buildDrawer(
                   icon:

@@ -1,7 +1,9 @@
 import 'dart:async';
 
 import 'package:festomps/providers/mqtt_provider.dart';
-import 'package:festomps/screens/stations_screen.dart';
+import 'package:festomps/screens/mqtt_home_screen/festomps_screen.dart';
+import 'package:festomps/screens/mqtt_home_screen/home_screen.dart';
+import 'package:festomps/screens/mqtt_home_screen/stations_screen.dart';
 import 'package:festomps/widgets/custom_drawer.dart';
 import 'package:flutter/material.dart';
 import 'package:mqtt_client/mqtt_server_client.dart';
@@ -91,26 +93,10 @@ class _MainHomeState extends State<MainHome> {
 
   late Status connStatus;
 
-  final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
-
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Scaffold(
-        key: scaffoldKey,
-        appBar: AppBar(
-          title: Custom.titleText('FESTO MPS'),
-          leading: IconButton(
-            icon: Custom.icon(Icons.menu, MyApp.appSecondaryColor),
-            onPressed: () => scaffoldKey.currentState?.openDrawer(),
-          ),
-        ),
-        drawer: const CustomDrawer(),
-        body: connStatus == Status.offline
-            ? const OfflineScreen()
-            : const SingleChildScrollView(
-                child: SizedBox(height: 3500, child: StationsScreen())),
-      ),
-    );
+    return connStatus == Status.offline
+        ? const OfflineScreen()
+        : const FestoMpsScreen();
   }
 }

@@ -1,0 +1,5 @@
+code_step:5
+manual_step:4
+manual_auto_mode:true
+system_on:true
+workpiece:uuh

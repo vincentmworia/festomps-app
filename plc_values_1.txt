@@ -1,0 +1,4 @@
+code_step:3
+manual_step:1
+manual_auto_mode:false
+system_on:true

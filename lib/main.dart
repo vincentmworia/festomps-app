@@ -45,25 +45,26 @@ class MyApp extends StatelessWidget {
         theme: ThemeData(
           colorScheme: ColorScheme.fromSwatch(primarySwatch: Colors.green)
               .copyWith(
-                secondary: Colors.teal,
+                secondary: Colors.orange,
               )
               .copyWith(
                 primary: MyApp.appPrimaryColor,
                 secondary: MyApp.appSecondaryColor,
               ),
+
           primaryColor: MyApp.appPrimaryColor,
-          appBarTheme: AppBarTheme(
+          appBarTheme: const AppBarTheme(
             toolbarHeight: 80.0,
             backgroundColor: MyApp.appPrimaryColor,
             centerTitle: true,
-            iconTheme: IconThemeData(color: Theme.of(context).primaryColor),
-            titleTextStyle: const TextStyle(
+
+            titleTextStyle: TextStyle(
               fontSize: 22.0,
               color: MyApp.appSecondaryColor,
               fontWeight: FontWeight.bold,
               letterSpacing: 5.0,
             ),
-          ),
+          ).copyWith(iconTheme: const IconThemeData(color: appSecondaryColor)),
           errorColor: Colors.red,
         ),
         // todo after 1hr check whether app is active
