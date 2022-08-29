@@ -167,311 +167,309 @@ class _LoginScreenState extends State<LoginScreen> {
     final fingerprintUseAuthorized =
         Provider.of<FirebaseUserData>(context).switchValue;
 
-    return SafeArea(
-      child: Scaffold(
-        backgroundColor: Colors.white,
-        body: SingleChildScrollView(
-          // physics: const BouncingScrollPhysics(
-          //     parent: AlwaysScrollableScrollPhysics()),
-          child: SizedBox(
-            height: deviceHeight,
-            child: Stack(
-              children: [
-                Form(
-                  key: _formKey,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: <Widget>[
-                      AnimatedContainer(
-                        duration: const Duration(milliseconds: 300),
-                        height: deviceHeight *
-                            (_authenticationMode == AuthenticationMode.signup
-                                ? 0.3
-                                : 0.45),
-                        child: ClipPath(
-                          clipper: CurveClipper(),
-                          child: const Image(
-                            image: AssetImage(MyApp.appBackgroundImgUrl),
-                            width: double.infinity,
-                            fit: BoxFit.cover,
-                          ),
+    return Scaffold(
+      backgroundColor: Colors.white,
+      body: SingleChildScrollView(
+        // physics: const BouncingScrollPhysics(
+        //     parent: AlwaysScrollableScrollPhysics()),
+        child: SizedBox(
+          height: deviceHeight,
+          child: Stack(
+            children: [
+              Form(
+                key: _formKey,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: <Widget>[
+                    AnimatedContainer(
+                      duration: const Duration(milliseconds: 300),
+                      height: deviceHeight *
+                          (_authenticationMode == AuthenticationMode.signup
+                              ? 0.3
+                              : 0.45),
+                      child: ClipPath(
+                        clipper: CurveClipper(),
+                        child: const Image(
+                          image: AssetImage(MyApp.appBackgroundImgUrl),
+                          width: double.infinity,
+                          fit: BoxFit.cover,
                         ),
                       ),
-                      if ((_authenticationMode == AuthenticationMode.login))
-                        SizedBox(height: deviceHeight * 0.05),
+                    ),
+                    if ((_authenticationMode == AuthenticationMode.login))
+                      SizedBox(height: deviceHeight * 0.05),
+                    InputField(
+                      key: const ValueKey('email'),
+                      controller: _emailController,
+                      hintText: 'Email',
+                      icon: Icons.account_box,
+                      obscureText: false,
+                      focusNode: _emailFocusNode,
+                      autoCorrect: false,
+                      enableSuggestions: false,
+                      textCapitalization: TextCapitalization.none,
+                      onFieldSubmitted: (_) => FocusScope.of(context)
+                          .requestFocus(
+                              _authenticationMode == AuthenticationMode.signup
+                                  ? _firstNameFocusNode
+                                  : _passwordFocusNode),
+                      textInputAction: TextInputAction.next,
+                      validator: (value) {
+                        if (value == null ||
+                            value.isEmpty ||
+                            !value.contains('@')) {
+                          return 'Please enter a valid email address';
+                        }
+                        return null;
+                      },
+                      onSaved: (value) {
+                        _userEmail = value!;
+                      },
+                    ),
+                    if ((_authenticationMode == AuthenticationMode.signup))
                       InputField(
-                        key: const ValueKey('email'),
-                        controller: _emailController,
-                        hintText: 'Email',
-                        icon: Icons.account_box,
+                        key: const ValueKey('firstName'),
+                        controller: _firstNameController,
+                        hintText: 'First Name',
+                        icon: Icons.person,
                         obscureText: false,
-                        focusNode: _emailFocusNode,
+                        focusNode: _firstNameFocusNode,
                         autoCorrect: false,
                         enableSuggestions: false,
-                        textCapitalization: TextCapitalization.none,
+                        textCapitalization: TextCapitalization.sentences,
                         onFieldSubmitted: (_) => FocusScope.of(context)
-                            .requestFocus(
-                                _authenticationMode == AuthenticationMode.signup
-                                    ? _firstNameFocusNode
-                                    : _passwordFocusNode),
+                            .requestFocus(_authenticationMode ==
+                                    AuthenticationMode.signup
+                                ? _lastNameFocusNode
+                                : _passwordFocusNode),
+                        textInputAction: TextInputAction.next,
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Enter First Name';
+                          }
+                          var isCaps = false;
+                          for (String val in alphabet) {
+                            if (val.toUpperCase() == value[0]) {
+                              isCaps = true;
+                              break;
+                            }
+                          }
+                          if (!isCaps) {
+                            return 'Name must start with a capital letter';
+                          }
+                          return null;
+                        },
+                        onSaved: (value) {
+                          _userFirstName = value!;
+                        },
+                      ),
+                    if ((_authenticationMode == AuthenticationMode.signup))
+                      InputField(
+                        key: const ValueKey('lastName'),
+                        controller: _lastNameController,
+                        hintText: 'Last Name',
+                        icon: Icons.person,
+                        obscureText: false,
+                        focusNode: _lastNameFocusNode,
+                        autoCorrect: false,
+                        enableSuggestions: false,
+                        textCapitalization: TextCapitalization.sentences,
+                        onFieldSubmitted: (_) => FocusScope.of(context)
+                            .requestFocus(_passwordFocusNode),
                         textInputAction: TextInputAction.next,
                         validator: (value) {
                           if (value == null ||
                               value.isEmpty ||
-                              !value.contains('@')) {
-                            return 'Please enter a valid email address';
+                              value.length < 4) {
+                            return 'Enter Last Name';
                           }
+                          var isCaps = false;
+                          for (String val in alphabet) {
+                            if (val.toUpperCase() == value[0]) {
+                              isCaps = true;
+                              break;
+                            }
+                          }
+                          if (!isCaps) {
+                            return 'Name must start with a capital letter';
+                          }
+
                           return null;
                         },
                         onSaved: (value) {
-                          _userEmail = value!;
+                          _userLastName = value!;
                         },
                       ),
-                      if ((_authenticationMode == AuthenticationMode.signup))
-                        InputField(
-                          key: const ValueKey('firstName'),
-                          controller: _firstNameController,
-                          hintText: 'First Name',
-                          icon: Icons.person,
-                          obscureText: false,
-                          focusNode: _firstNameFocusNode,
-                          autoCorrect: false,
-                          enableSuggestions: false,
-                          textCapitalization: TextCapitalization.sentences,
-                          onFieldSubmitted: (_) => FocusScope.of(context)
-                              .requestFocus(_authenticationMode ==
-                                      AuthenticationMode.signup
-                                  ? _lastNameFocusNode
-                                  : _passwordFocusNode),
-                          textInputAction: TextInputAction.next,
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Enter First Name';
-                            }
-                            var isCaps = false;
-                            for (String val in alphabet) {
-                              if (val.toUpperCase() == value[0]) {
-                                isCaps = true;
-                                break;
-                              }
-                            }
-                            if (!isCaps) {
-                              return 'Name must start with a capital letter';
-                            }
-                            return null;
-                          },
-                          onSaved: (value) {
-                            _userFirstName = value!;
-                          },
-                        ),
-                      if ((_authenticationMode == AuthenticationMode.signup))
-                        InputField(
-                          key: const ValueKey('lastName'),
-                          controller: _lastNameController,
-                          hintText: 'Last Name',
-                          icon: Icons.person,
-                          obscureText: false,
-                          focusNode: _lastNameFocusNode,
-                          autoCorrect: false,
-                          enableSuggestions: false,
-                          textCapitalization: TextCapitalization.sentences,
-                          onFieldSubmitted: (_) => FocusScope.of(context)
-                              .requestFocus(_passwordFocusNode),
-                          textInputAction: TextInputAction.next,
-                          validator: (value) {
-                            if (value == null ||
-                                value.isEmpty ||
-                                value.length < 4) {
-                              return 'Enter Last Name';
-                            }
-                            var isCaps = false;
-                            for (String val in alphabet) {
-                              if (val.toUpperCase() == value[0]) {
-                                isCaps = true;
-                                break;
-                              }
-                            }
-                            if (!isCaps) {
-                              return 'Name must start with a capital letter';
-                            }
-
-                            return null;
-                          },
-                          onSaved: (value) {
-                            _userLastName = value!;
-                          },
-                        ),
+                    InputField(
+                      key: const ValueKey('password'),
+                      controller: _passwordController,
+                      hintText: 'Password',
+                      icon: Icons.lock,
+                      obscureText: true,
+                      focusNode: _passwordFocusNode,
+                      autoCorrect: false,
+                      enableSuggestions: false,
+                      textCapitalization: TextCapitalization.none,
+                      onFieldSubmitted: (_) => FocusScope.of(context)
+                          .requestFocus(
+                              _authenticationMode == AuthenticationMode.signup
+                                  ? _confirmPasswordFocusNode
+                                  : null),
+                      textInputAction:
+                          _authenticationMode == AuthenticationMode.signup
+                              ? TextInputAction.next
+                              : TextInputAction.done,
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please enter a valid password.';
+                        }
+                        if (value.length < 7) {
+                          return 'Password must be at least 7 characters long';
+                        }
+                        if (_passwordController.text.toLowerCase().trim() ==
+                                _firstNameController.text
+                                    .toLowerCase()
+                                    .trim() ||
+                            _passwordController.text.toLowerCase().trim() ==
+                                '${_firstNameController.text}${_lastNameController.text}'
+                                    .toLowerCase()
+                                    .trim() ||
+                            _passwordController.text.toLowerCase().trim() ==
+                                _lastNameController.text
+                                    .toLowerCase()
+                                    .trim() ||
+                            _passwordController.text.toLowerCase().trim() ==
+                                _emailController.text.toLowerCase().trim()) {
+                          return 'Password must be different from email and name';
+                        }
+                        return null;
+                      },
+                      onSaved: (value) {
+                        _userPassword = value!;
+                      },
+                    ),
+                    if ((_authenticationMode == AuthenticationMode.signup))
                       InputField(
-                        key: const ValueKey('password'),
-                        controller: _passwordController,
-                        hintText: 'Password',
+                        key: const ValueKey('confirmPassword'),
+                        controller: _confirmPasswordController,
+                        hintText: 'Confirm Password',
                         icon: Icons.lock,
                         obscureText: true,
-                        focusNode: _passwordFocusNode,
+                        focusNode: _confirmPasswordFocusNode,
                         autoCorrect: false,
                         enableSuggestions: false,
                         textCapitalization: TextCapitalization.none,
-                        onFieldSubmitted: (_) => FocusScope.of(context)
-                            .requestFocus(
-                                _authenticationMode == AuthenticationMode.signup
-                                    ? _confirmPasswordFocusNode
-                                    : null),
-                        textInputAction:
-                            _authenticationMode == AuthenticationMode.signup
-                                ? TextInputAction.next
-                                : TextInputAction.done,
+                        onFieldSubmitted: (_) =>
+                            FocusScope.of(context).requestFocus(null),
+                        textInputAction: TextInputAction.done,
                         validator: (value) {
                           if (value == null || value.isEmpty) {
                             return 'Please enter a valid password.';
                           }
-                          if (value.length < 7) {
-                            return 'Password must be at least 7 characters long';
-                          }
-                          if (_passwordController.text.toLowerCase().trim() ==
-                                  _firstNameController.text
-                                      .toLowerCase()
-                                      .trim() ||
-                              _passwordController.text.toLowerCase().trim() ==
-                                  '${_firstNameController.text}${_lastNameController.text}'
-                                      .toLowerCase()
-                                      .trim() ||
-                              _passwordController.text.toLowerCase().trim() ==
-                                  _lastNameController.text
-                                      .toLowerCase()
-                                      .trim() ||
-                              _passwordController.text.toLowerCase().trim() ==
-                                  _emailController.text.toLowerCase().trim()) {
-                            return 'Password must be different from email and name';
+                          if (_passwordController.text !=
+                              _confirmPasswordController.text) {
+                            return 'Passwords do not match';
                           }
                           return null;
                         },
-                        onSaved: (value) {
-                          _userPassword = value!;
-                        },
                       ),
-                      if ((_authenticationMode == AuthenticationMode.signup))
-                        InputField(
-                          key: const ValueKey('confirmPassword'),
-                          controller: _confirmPasswordController,
-                          hintText: 'Confirm Password',
-                          icon: Icons.lock,
-                          obscureText: true,
-                          focusNode: _confirmPasswordFocusNode,
-                          autoCorrect: false,
-                          enableSuggestions: false,
-                          textCapitalization: TextCapitalization.none,
-                          onFieldSubmitted: (_) =>
-                              FocusScope.of(context).requestFocus(null),
-                          textInputAction: TextInputAction.done,
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Please enter a valid password.';
-                            }
-                            if (_passwordController.text !=
-                                _confirmPasswordController.text) {
-                              return 'Passwords do not match';
-                            }
-                            return null;
-                          },
-                        ),
-                      Expanded(
-                          child: Align(
-                        alignment: FractionalOffset.bottomCenter,
-                        child: SizedBox(
-                          height: MediaQuery.of(context).size.height * 0.35,
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: [
-                              if (_authenticationMode ==
-                                  AuthenticationMode.login)
-                                FutureBuilder(
-                                    future: _checkBiometrics(),
-                                    builder: (context, snap) {
-                                      if (snap.connectionState ==
-                                          ConnectionState.waiting) {
-                                        // print('wait');
-                                        return const Center();
-                                      }
-                                      var deviceHasBiometrics =
-                                          snap.data as bool;
-                                      // print(
-                                      //     'Finger auth: $fingerprintUseAuthorized');
-                                      // print('device auth: $deviceHasBiometrics');
+                    Expanded(
+                        child: Align(
+                      alignment: FractionalOffset.bottomCenter,
+                      child: SizedBox(
+                        height: MediaQuery.of(context).size.height * 0.35,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            if (_authenticationMode ==
+                                AuthenticationMode.login)
+                              FutureBuilder(
+                                  future: _checkBiometrics(),
+                                  builder: (context, snap) {
+                                    if (snap.connectionState ==
+                                        ConnectionState.waiting) {
+                                      // print('wait');
+                                      return const Center();
+                                    }
+                                    var deviceHasBiometrics =
+                                        snap.data as bool;
+                                    // print(
+                                    //     'Finger auth: $fingerprintUseAuthorized');
+                                    // print('device auth: $deviceHasBiometrics');
 
-                                      _loginWithFingerprint =
-                                          fingerprintUseAuthorized &&
-                                              deviceHasBiometrics;
+                                    _loginWithFingerprint =
+                                        fingerprintUseAuthorized &&
+                                            deviceHasBiometrics;
 
-                                      // print(_loginWithFingerprint);
-                                      if (!_loginWithFingerprint) {
-                                        return const Center();
-                                      }
-                                      return Padding(
-                                        padding: const EdgeInsets.all(4.0),
-                                        child: IconButton(
-                                          onPressed: _getAuth,
-                                          iconSize: MediaQuery.of(context)
-                                                  .size
-                                                  .height *
-                                              0.06,
-                                          icon: const Icon(
-                                            Icons.fingerprint,
-                                            color: MyApp.appSecondaryColor,
-                                          ),
+                                    // print(_loginWithFingerprint);
+                                    if (!_loginWithFingerprint) {
+                                      return const Center();
+                                    }
+                                    return Padding(
+                                      padding: const EdgeInsets.all(4.0),
+                                      child: IconButton(
+                                        onPressed: _getAuth,
+                                        iconSize: MediaQuery.of(context)
+                                                .size
+                                                .height *
+                                            0.06,
+                                        icon: const Icon(
+                                          Icons.fingerprint,
+                                          color: MyApp.appSecondaryColor,
                                         ),
-                                      );
-                                    }),
-                              Custom.elevatedButton(
-                                context: context,
-                                title: _isLoading
-                                    ? Custom.loadingText
-                                    : (_authenticationMode ==
-                                            AuthenticationMode.signup
-                                        ? 'Sign Up'
-                                        : 'Login'),
-                                onPress: _isLoading ? () {} : _submit,
+                                      ),
+                                    );
+                                  }),
+                            Custom.elevatedButton(
+                              context: context,
+                              title: _isLoading
+                                  ? Custom.loadingText
+                                  : (_authenticationMode ==
+                                          AuthenticationMode.signup
+                                      ? 'Sign Up'
+                                      : 'Login'),
+                              onPress: _isLoading ? () {} : _submit,
+                            ),
+                            GestureDetector(
+                              onTap: () {
+                                setState(() {
+                                  _authenticationMode ==
+                                          AuthenticationMode.signup
+                                      ? _authenticationMode =
+                                          AuthenticationMode.login
+                                      : _authenticationMode =
+                                          AuthenticationMode.signup;
+                                });
+                              },
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: <Widget>[
+                                  Custom.normalText((_authenticationMode ==
+                                          AuthenticationMode.login)
+                                      ? 'Don\'t have an account? '
+                                      : 'Already have an account? '),
+                                  Custom.normalTextOrange('\tClick here '),
+                                  // const Text(
+                                  //   '\tClick here ',
+                                  //   style: TextStyle(
+                                  //       color: MyApp.appPrimaryColor, fontSize: 16.0),
+                                  // ),
+                                ],
                               ),
-                              GestureDetector(
-                                onTap: () {
-                                  setState(() {
-                                    _authenticationMode ==
-                                            AuthenticationMode.signup
-                                        ? _authenticationMode =
-                                            AuthenticationMode.login
-                                        : _authenticationMode =
-                                            AuthenticationMode.signup;
-                                  });
-                                },
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: <Widget>[
-                                    Custom.normalText((_authenticationMode ==
-                                            AuthenticationMode.login)
-                                        ? 'Don\'t have an account? '
-                                        : 'Already have an account? '),
-                                    Custom.normalTextOrange('\tClick here '),
-                                    // const Text(
-                                    //   '\tClick here ',
-                                    //   style: TextStyle(
-                                    //       color: MyApp.appPrimaryColor, fontSize: 16.0),
-                                    // ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
-                      ))
-                    ],
-                  ),
+                      ),
+                    ))
+                  ],
                 ),
-                if (_isLoading || _isReadingFingerprint)
-                  Container(
-                    height: deviceHeight,
-                    color: MyApp.appSecondaryColor2.withOpacity(0.75),
-                  ),
-              ],
-            ),
+              ),
+              if (_isLoading || _isReadingFingerprint)
+                Container(
+                  height: deviceHeight,
+                  color: MyApp.appSecondaryColor2.withOpacity(0.75),
+                ),
+            ],
           ),
         ),
       ),

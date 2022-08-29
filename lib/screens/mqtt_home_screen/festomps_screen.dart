@@ -105,15 +105,14 @@ class _FestoMpsScreenState extends State<FestoMpsScreen> {
       if (c[0].topic == "MANUAL AUTO MODE DISTRIBUTION") {
         final message =
             MqttPublishPayload.bytesToStringAsString(recMess.payload.message);
-        _distStationManAutoState = message == "true" ? true : false;
+        _distStationManAutoState = message == "True" ? true : false;
         distManMode.sink.add(_distStationManAutoState);
         distAutoMode.sink.add(!_distStationManAutoState);
       }
       if (c[0].topic == "SYSTEM ON DISTRIBUTION") {
         final message =
             MqttPublishPayload.bytesToStringAsString(recMess.payload.message);
-
-        distOn.sink.add(message == "true" ? true : false);
+        distOn.sink.add(message == "True" ? true : false);
       }
 
       if (c[0].topic == 'CODE STEP SORTING') {
@@ -164,14 +163,14 @@ class _FestoMpsScreenState extends State<FestoMpsScreen> {
       if (c[0].topic == "MANUAL AUTO MODE SORTING") {
         final message =
             MqttPublishPayload.bytesToStringAsString(recMess.payload.message);
-        _sortStationManAutoState = message == "true" ? true : false;
+        _sortStationManAutoState = message == "True" ? true : false;
         sortManMode.sink.add(_sortStationManAutoState);
         sortAutoMode.sink.add(!_sortStationManAutoState);
       }
       if (c[0].topic == "SYSTEM ON SORTING") {
         final message =
             MqttPublishPayload.bytesToStringAsString(recMess.payload.message);
-        sortOn.sink.add(message == "true" ? true : false);
+        sortOn.sink.add(message == "True" ? true : false);
       }
       if (c[0].topic == "SYSTEM ON ALL") {
         final message =
@@ -249,7 +248,10 @@ class _FestoMpsScreenState extends State<FestoMpsScreen> {
   Widget _topic(String title, int ctr) => SizedBox(
         height: 50,
         child: ElevatedButton(
-          style: ElevatedButton.styleFrom(elevation: 0),
+          style: ElevatedButton.styleFrom(
+            elevation: 0,
+            // enableFeedback: false,
+          ),
           onPressed: () {
             setState(() => counter = ctr);
             _scrollToCounter();
@@ -377,7 +379,7 @@ class _FestoMpsScreenState extends State<FestoMpsScreen> {
                   : allCodeStep.stream,
           builder: (context, snap) {
             if (snap.connectionState == ConnectionState.waiting) {
-              return const Center();
+              return  Center(child:Custom.titleText('TURN ON SERVER!'),);
             }
             final data = snap.data as Map<String, dynamic>;
             if (stationName == _distribution) {
@@ -416,6 +418,7 @@ class _FestoMpsScreenState extends State<FestoMpsScreen> {
                                 containerWidth,
                                 containerHeight)
                             : ImageView(
+                      
                                 _allCurrentStep,
                                 Station.all,
                                 _sortWorkpieceName,
@@ -629,77 +632,76 @@ class _FestoMpsScreenState extends State<FestoMpsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-        child: Scaffold(
+    return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        elevation: 0,
-        title: Custom.titleText('FESTO MPS'),
+    elevation: 0,
+    title: Custom.titleText('FESTO MPS'),
       ),
       drawer: Provider.of<ActivateBn>(context, listen: false).bnStatus
-          ? null
-          : const CustomDrawer(),
+      ? null
+      : const CustomDrawer(),
       body: StreamBuilder(
-          stream: mainStream.stream,
-          builder: (context, snap) {
-            if (snap.connectionState == ConnectionState.waiting) {
-              return Container(
-                color: MyApp.appSecondaryColor2.withOpacity(0.5),
+      stream: mainStream.stream,
+      builder: (context, snap) {
+        if (snap.connectionState == ConnectionState.waiting) {
+          return Container(
+            color: MyApp.appSecondaryColor2.withOpacity(0.5),
+            child: const Center(
+                child: Text(
+              'Fetching\nserver\ndata...',
+              style: TextStyle(
+                  letterSpacing: 20.0, color: Colors.white, fontSize: 30.0),
+            )),
+          );
+        }
+        return Stack(
+          children: [
+            Column(
+              children: [
+                Container(
+                  color: MyApp.appPrimaryColor,
+                  height: 50,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      _topic('     ALL      ', 0),
+                      _topic('DISTRIBUTION', 1),
+                      _topic('  SORTING   ', 2),
+                    ],
+                  ),
+                ),
+                Expanded(
+                    child: LayoutBuilder(builder: (context, constraints) {
+                  return SingleChildScrollView(
+                    physics: const BouncingScrollPhysics(),
+                    scrollDirection: scrollDirection,
+                    controller: _controller,
+                    child: Column(children: [
+                      _stationDisplay(_all, constraints.maxHeight),
+                      _stationDisplay(_distribution, constraints.maxHeight),
+                      _stationDisplay(_sorting, constraints.maxHeight),
+                    ]),
+                  );
+                }))
+              ],
+            ),
+            if (snap.data as String == "terminated")
+              Container(
+                color: Colors.grey,
                 child: const Center(
                     child: Text(
-                  'Fetching\nserver\ndata...',
+                  'SERVER\nOFF',
                   style: TextStyle(
-                      letterSpacing: 20.0, color: Colors.white, fontSize: 30.0),
+                      letterSpacing: 20.0,
+                      color: Colors.white,
+                      fontSize: 30.0),
                 )),
-              );
-            }
-            return Stack(
-              children: [
-                Column(
-                  children: [
-                    Container(
-                      color: MyApp.appPrimaryColor,
-                      height: 50,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          _topic('     ALL      ', 0),
-                          _topic('DISTRIBUTION', 1),
-                          _topic('  SORTING   ', 2),
-                        ],
-                      ),
-                    ),
-                    Expanded(
-                        child: LayoutBuilder(builder: (context, constraints) {
-                      return SingleChildScrollView(
-                        physics: const BouncingScrollPhysics(),
-                        scrollDirection: scrollDirection,
-                        controller: _controller,
-                        child: Column(children: [
-                          _stationDisplay(_all, constraints.maxHeight),
-                          _stationDisplay(_distribution, constraints.maxHeight),
-                          _stationDisplay(_sorting, constraints.maxHeight),
-                        ]),
-                      );
-                    }))
-                  ],
-                ),
-                if (snap.data as String == "terminated")
-                  Container(
-                    color: Colors.grey,
-                    child: const Center(
-                        child: Text(
-                      'SERVER\nOFF',
-                      style: TextStyle(
-                          letterSpacing: 20.0,
-                          color: Colors.white,
-                          fontSize: 30.0),
-                    )),
-                  ),
-              ],
-            );
-          }),
-    ));
+              ),
+          ],
+        );
+      }),
+    );
   }
 }

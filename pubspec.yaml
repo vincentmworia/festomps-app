@@ -24,6 +24,8 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  flutter_launcher_icons:
+  flutter_native_splash:
 
   flutter_lints: ^2.0.0
 
@@ -34,3 +36,11 @@ flutter:
      - assets/images/
      - assets/images/distribution/
      - assets/images/sorting/
+
+flutter_icons:
+  android: true
+  ios: true
+  image_path: 'assets/images/background.png'
+
+flutter_native_splash:
+  background_image: assets/images/background.png

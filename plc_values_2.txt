@@ -1,5 +1,9 @@
-code_step:5
-manual_step:4
+code_step:3
+manual_step:5
 manual_auto_mode:true
 system_on:true
-workpiece:uuh
+workpiece:black
+red:6
+black:22
+metallic:1
+total:29

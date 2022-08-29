@@ -10,22 +10,20 @@ final String title;
 final Color color;
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Scaffold(
-        appBar: AppBar(
-            backgroundColor: MyApp.appSecondaryColor2.withOpacity(0.75), 
-          title: Custom.titleText('FESTO MPS'),
-        ),
-        drawer: const CustomDrawer(),
-        body: Container(
-          color:color.withOpacity(0.5),
-          child:  Center(
-              child: Text(
-            title,
-            style: const TextStyle(
-                letterSpacing: 20.0, color: Colors.white, fontSize: 30.0),
-          )),
-        ),
+    return Scaffold(
+      appBar: AppBar(
+          backgroundColor: MyApp.appSecondaryColor2.withOpacity(0.75),
+        title: Custom.titleText('FESTO MPS'),
+      ),
+      drawer: const CustomDrawer(),
+      body: Container(
+        color:color.withOpacity(0.5),
+        child:  Center(
+            child: Text(
+          title,
+          style: const TextStyle(
+              letterSpacing: 20.0, color: Colors.white, fontSize: 30.0),
+        )),
       ),
     );
   }

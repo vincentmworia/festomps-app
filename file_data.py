@@ -75,10 +75,10 @@ def all_system_on():
 
 
 def all_code_step():
-    code_step_number_1 = read_plc1_state()['code_step']
-    code_step_number_2 = read_plc2_state()['code_step']
+    code_step_number_1 = dist_code_step()
+    code_step_number_2 = sort_code_step()
     return (code_step_number_1 if int(code_step_number_1) <= 7
-            else '1' + code_step_number_2) + ':' + code_step_number_2
+            else '1' + code_step_number_2)
 
 
-update_time = 0.05
+update_time = 0.1

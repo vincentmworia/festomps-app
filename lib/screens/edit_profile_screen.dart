@@ -171,269 +171,267 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     final deviceHeight =
         MediaQuery.of(context).size.height - MediaQuery.of(context).padding.top;
 
-    return SafeArea(
-      child: Scaffold(
-        appBar: AppBar(
-          backgroundColor:
-              _isLoading ? MyApp.appSecondaryColor2.withOpacity(0.75) : null,
-          title: Custom.titleText(_isLoading ? '' : 'EDIT PROFILE'),
-          leading: _isLoading
-              ? const Center()
-              : IconButton(
-                  icon: Custom.icon(Icons.arrow_back, MyApp.appSecondaryColor),
-                  onPressed: () => Navigator.pop(context),
-                ),
-        ),
-        body: SingleChildScrollView(
-          child: SizedBox(
-            height: deviceHeight,
-            child: Stack(
-              children: [
-                Custom.containerStyled,
-                Center(
-                  child: SizedBox(
-                    height: deviceHeight / 1.2,
-                    child: Form(
-                      key: _formKey,
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 20),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: [
-                            Column(
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              children: <Widget>[
-                                InputField(
-                                  key: const ValueKey('email'),
-                                  controller: _emailController,
-                                  hintText: 'Email',
-                                  icon: Icons.account_box,
-                                  obscureText: false,
-                                  focusNode: _emailFocusNode,
-                                  autoCorrect: false,
-                                  enableSuggestions: false,
-                                  textCapitalization: TextCapitalization.none,
-                                  onFieldSubmitted: (_) =>
-                                      FocusScope.of(context)
-                                          .requestFocus(_firstNameFocusNode),
-                                  textInputAction: TextInputAction.next,
-                                  validator: (value) {
-                                    if (value == null ||
-                                        value.isEmpty ||
-                                        !value.contains('@')) {
-                                      return 'Please enter a valid email address';
-                                    }
-                                    return null;
-                                  },
-                                  onSaved: (value) {
-                                    _userEmailNew = value!;
-                                  },
-                                ),
-                                InputField(
-                                  key: const ValueKey('firstName'),
-                                  controller: _firstNameController,
-                                  hintText: 'First Name',
-                                  icon: Icons.person,
-                                  obscureText: false,
-                                  focusNode: _firstNameFocusNode,
-                                  autoCorrect: false,
-                                  enableSuggestions: false,
-                                  textCapitalization:
-                                      TextCapitalization.sentences,
-                                  onFieldSubmitted: (_) =>
-                                      FocusScope.of(context)
-                                          .requestFocus(_lastNameFocusNode),
-                                  textInputAction: TextInputAction.next,
-                                  validator: (value) {
-                                    if (value == null || value.isEmpty) {
-                                      return 'Enter First Name';
-                                    }
-                                    var isCaps = false;
-                                    for (String val in alphabet) {
-                                      if (val.toUpperCase() == value[0]) {
-                                        isCaps = true;
-                                        break;
-                                      }
-                                    }
-                                    if (!isCaps) {
-                                      return 'Name must start with a capital letter';
-                                    }
-                                    return null;
-                                  },
-                                  onSaved: (value) {
-                                    _userFirstNameNew = value!;
-                                  },
-                                ),
-                                InputField(
-                                  key: const ValueKey('lastName'),
-                                  controller: _lastNameController,
-                                  hintText: 'Last Name',
-                                  icon: Icons.person,
-                                  obscureText: false,
-                                  focusNode: _lastNameFocusNode,
-                                  autoCorrect: false,
-                                  enableSuggestions: false,
-                                  textCapitalization:
-                                      TextCapitalization.sentences,
-                                  onFieldSubmitted: (_) =>
-                                      FocusScope.of(context)
-                                          .requestFocus(_passwordFocusNode),
-                                  textInputAction: TextInputAction.next,
-                                  validator: (value) {
-                                    if (value == null ||
-                                        value.isEmpty ||
-                                        value.length < 4) {
-                                      return 'Enter Last Name';
-                                    }
-
-                                    var isCaps = false;
-                                    for (String val in alphabet) {
-                                      if (val.toUpperCase() == value[0]) {
-                                        isCaps = true;
-                                        break;
-                                      }
-                                    }
-                                    if (!isCaps) {
-                                      return 'Name must start with a capital letter';
-                                    }
-
-                                    return null;
-                                  },
-                                  onSaved: (value) {
-                                    _userLastNameNew = value!;
-                                  },
-                                ),
-                                InputField(
-                                  key: const ValueKey('oldPassword'),
-                                  controller: _oldPasswordController,
-                                  hintText: 'Old Password',
-                                  icon: Icons.lock,
-                                  obscureText: true,
-                                  focusNode: _oldPasswordFocusNode,
-                                  autoCorrect: false,
-                                  enableSuggestions: false,
-                                  textCapitalization: TextCapitalization.none,
-                                  onFieldSubmitted: (_) =>
-                                      FocusScope.of(context)
-                                          .requestFocus(_passwordFocusNode),
-                                  textInputAction: TextInputAction.next,
-                                  validator: (value) {
-                                    if (value == null || value.isEmpty) {
-                                      return 'Please enter a valid password.';
-                                    }
-                                    if (_oldPasswordController.text !=
-                                        _initValues.password) {
-                                      return 'Old password is wrong';
-                                    }
-                                    return null;
-                                  },
-                                  onSaved: (value) {
-                                    _userNewPassword = value!;
-                                  },
-                                ),
-                                InputField(
-                                  key: const ValueKey('newPassword'),
-                                  controller: _newPasswordController,
-                                  hintText: 'New Password',
-                                  icon: Icons.lock,
-                                  obscureText: true,
-                                  focusNode: _passwordFocusNode,
-                                  autoCorrect: false,
-                                  enableSuggestions: false,
-                                  textCapitalization: TextCapitalization.none,
-                                  onFieldSubmitted: (_) =>
-                                      FocusScope.of(context).requestFocus(
-                                          _confirmPasswordFocusNode),
-                                  textInputAction: TextInputAction.next,
-                                  validator: (value) {
-                                    if (value == null || value.isEmpty) {
-                                      return 'Please enter a valid password.';
-                                    }
-                                    if (value.length < 7) {
-                                      return 'Password must be at least 7 characters long';
-                                    }
-                                    if (_newPasswordController.text
-                                                .toLowerCase()
-                                                .trim() ==
-                                            _firstNameController.text
-                                                .toLowerCase()
-                                                .trim() ||
-                                        _newPasswordController.text
-                                                .toLowerCase()
-                                                .trim() ==
-                                            '${_firstNameController.text}${_lastNameController.text}'
-                                                .toLowerCase()
-                                                .trim() ||
-                                        _newPasswordController.text
-                                                .toLowerCase()
-                                                .trim() ==
-                                            _lastNameController.text
-                                                .toLowerCase()
-                                                .trim() ||
-                                        _newPasswordController.text
-                                                .toLowerCase()
-                                                .trim() ==
-                                            _emailController.text
-                                                .toLowerCase()
-                                                .trim()) {
-                                      return 'Password must be different from email and name';
-                                    }
-                                    return null;
-                                  },
-                                  onSaved: (value) {
-                                    _userNewPassword = value!;
-                                  },
-                                ),
-                                InputField(
-                                  key: const ValueKey('confirmPassword'),
-                                  controller: _confirmPasswordController,
-                                  hintText: 'Confirm Password',
-                                  icon: Icons.lock,
-                                  obscureText: true,
-                                  focusNode: _confirmPasswordFocusNode,
-                                  autoCorrect: false,
-                                  enableSuggestions: false,
-                                  textCapitalization: TextCapitalization.none,
-                                  onFieldSubmitted: (_) =>
-                                      FocusScope.of(context).requestFocus(null),
-                                  textInputAction: TextInputAction.done,
-                                  validator: (value) {
-                                    if (value == null || value.isEmpty) {
-                                      return 'Please enter a valid password.';
-                                    }
-                                    if (_newPasswordController.text !=
-                                        _confirmPasswordController.text) {
-                                      return 'Passwords do not match';
-                                    }
-                                    return null;
-                                  },
-                                ),
-                              ],
-                            ),
-                            Expanded(
-                              child: Align(
-                                alignment: Alignment.center,
-                                child: Custom.elevatedButton(
-                                  context: context,
-                                  title:
-                                      _isLoading ? Custom.loadingText : 'Done',
-                                  onPress: _isLoading ? () {} : _submit,
-                                ),
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor:
+            _isLoading ? MyApp.appSecondaryColor2.withOpacity(0.75) : null,
+        title: Custom.titleText(_isLoading ? '' : 'EDIT PROFILE'),
+        leading: _isLoading
+            ? const Center()
+            : IconButton(
+                icon: Custom.icon(Icons.arrow_back, MyApp.appSecondaryColor),
+                onPressed: () => Navigator.pop(context),
+              ),
+      ),
+      body: SingleChildScrollView(
+        child: SizedBox(
+          height: deviceHeight,
+          child: Stack(
+            children: [
+              Custom.containerStyled,
+              Center(
+                child: SizedBox(
+                  height: deviceHeight / 1.2,
+                  child: Form(
+                    key: _formKey,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 20),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: <Widget>[
+                              InputField(
+                                key: const ValueKey('email'),
+                                controller: _emailController,
+                                hintText: 'Email',
+                                icon: Icons.account_box,
+                                obscureText: false,
+                                focusNode: _emailFocusNode,
+                                autoCorrect: false,
+                                enableSuggestions: false,
+                                textCapitalization: TextCapitalization.none,
+                                onFieldSubmitted: (_) =>
+                                    FocusScope.of(context)
+                                        .requestFocus(_firstNameFocusNode),
+                                textInputAction: TextInputAction.next,
+                                validator: (value) {
+                                  if (value == null ||
+                                      value.isEmpty ||
+                                      !value.contains('@')) {
+                                    return 'Please enter a valid email address';
+                                  }
+                                  return null;
+                                },
+                                onSaved: (value) {
+                                  _userEmailNew = value!;
+                                },
                               ),
-                            )
-                          ],
-                        ),
+                              InputField(
+                                key: const ValueKey('firstName'),
+                                controller: _firstNameController,
+                                hintText: 'First Name',
+                                icon: Icons.person,
+                                obscureText: false,
+                                focusNode: _firstNameFocusNode,
+                                autoCorrect: false,
+                                enableSuggestions: false,
+                                textCapitalization:
+                                    TextCapitalization.sentences,
+                                onFieldSubmitted: (_) =>
+                                    FocusScope.of(context)
+                                        .requestFocus(_lastNameFocusNode),
+                                textInputAction: TextInputAction.next,
+                                validator: (value) {
+                                  if (value == null || value.isEmpty) {
+                                    return 'Enter First Name';
+                                  }
+                                  var isCaps = false;
+                                  for (String val in alphabet) {
+                                    if (val.toUpperCase() == value[0]) {
+                                      isCaps = true;
+                                      break;
+                                    }
+                                  }
+                                  if (!isCaps) {
+                                    return 'Name must start with a capital letter';
+                                  }
+                                  return null;
+                                },
+                                onSaved: (value) {
+                                  _userFirstNameNew = value!;
+                                },
+                              ),
+                              InputField(
+                                key: const ValueKey('lastName'),
+                                controller: _lastNameController,
+                                hintText: 'Last Name',
+                                icon: Icons.person,
+                                obscureText: false,
+                                focusNode: _lastNameFocusNode,
+                                autoCorrect: false,
+                                enableSuggestions: false,
+                                textCapitalization:
+                                    TextCapitalization.sentences,
+                                onFieldSubmitted: (_) =>
+                                    FocusScope.of(context)
+                                        .requestFocus(_passwordFocusNode),
+                                textInputAction: TextInputAction.next,
+                                validator: (value) {
+                                  if (value == null ||
+                                      value.isEmpty ||
+                                      value.length < 4) {
+                                    return 'Enter Last Name';
+                                  }
+
+                                  var isCaps = false;
+                                  for (String val in alphabet) {
+                                    if (val.toUpperCase() == value[0]) {
+                                      isCaps = true;
+                                      break;
+                                    }
+                                  }
+                                  if (!isCaps) {
+                                    return 'Name must start with a capital letter';
+                                  }
+
+                                  return null;
+                                },
+                                onSaved: (value) {
+                                  _userLastNameNew = value!;
+                                },
+                              ),
+                              InputField(
+                                key: const ValueKey('oldPassword'),
+                                controller: _oldPasswordController,
+                                hintText: 'Old Password',
+                                icon: Icons.lock,
+                                obscureText: true,
+                                focusNode: _oldPasswordFocusNode,
+                                autoCorrect: false,
+                                enableSuggestions: false,
+                                textCapitalization: TextCapitalization.none,
+                                onFieldSubmitted: (_) =>
+                                    FocusScope.of(context)
+                                        .requestFocus(_passwordFocusNode),
+                                textInputAction: TextInputAction.next,
+                                validator: (value) {
+                                  if (value == null || value.isEmpty) {
+                                    return 'Please enter a valid password.';
+                                  }
+                                  if (_oldPasswordController.text !=
+                                      _initValues.password) {
+                                    return 'Old password is wrong';
+                                  }
+                                  return null;
+                                },
+                                onSaved: (value) {
+                                  _userNewPassword = value!;
+                                },
+                              ),
+                              InputField(
+                                key: const ValueKey('newPassword'),
+                                controller: _newPasswordController,
+                                hintText: 'New Password',
+                                icon: Icons.lock,
+                                obscureText: true,
+                                focusNode: _passwordFocusNode,
+                                autoCorrect: false,
+                                enableSuggestions: false,
+                                textCapitalization: TextCapitalization.none,
+                                onFieldSubmitted: (_) =>
+                                    FocusScope.of(context).requestFocus(
+                                        _confirmPasswordFocusNode),
+                                textInputAction: TextInputAction.next,
+                                validator: (value) {
+                                  if (value == null || value.isEmpty) {
+                                    return 'Please enter a valid password.';
+                                  }
+                                  if (value.length < 7) {
+                                    return 'Password must be at least 7 characters long';
+                                  }
+                                  if (_newPasswordController.text
+                                              .toLowerCase()
+                                              .trim() ==
+                                          _firstNameController.text
+                                              .toLowerCase()
+                                              .trim() ||
+                                      _newPasswordController.text
+                                              .toLowerCase()
+                                              .trim() ==
+                                          '${_firstNameController.text}${_lastNameController.text}'
+                                              .toLowerCase()
+                                              .trim() ||
+                                      _newPasswordController.text
+                                              .toLowerCase()
+                                              .trim() ==
+                                          _lastNameController.text
+                                              .toLowerCase()
+                                              .trim() ||
+                                      _newPasswordController.text
+                                              .toLowerCase()
+                                              .trim() ==
+                                          _emailController.text
+                                              .toLowerCase()
+                                              .trim()) {
+                                    return 'Password must be different from email and name';
+                                  }
+                                  return null;
+                                },
+                                onSaved: (value) {
+                                  _userNewPassword = value!;
+                                },
+                              ),
+                              InputField(
+                                key: const ValueKey('confirmPassword'),
+                                controller: _confirmPasswordController,
+                                hintText: 'Confirm Password',
+                                icon: Icons.lock,
+                                obscureText: true,
+                                focusNode: _confirmPasswordFocusNode,
+                                autoCorrect: false,
+                                enableSuggestions: false,
+                                textCapitalization: TextCapitalization.none,
+                                onFieldSubmitted: (_) =>
+                                    FocusScope.of(context).requestFocus(null),
+                                textInputAction: TextInputAction.done,
+                                validator: (value) {
+                                  if (value == null || value.isEmpty) {
+                                    return 'Please enter a valid password.';
+                                  }
+                                  if (_newPasswordController.text !=
+                                      _confirmPasswordController.text) {
+                                    return 'Passwords do not match';
+                                  }
+                                  return null;
+                                },
+                              ),
+                            ],
+                          ),
+                          Expanded(
+                            child: Align(
+                              alignment: Alignment.center,
+                              child: Custom.elevatedButton(
+                                context: context,
+                                title:
+                                    _isLoading ? Custom.loadingText : 'Done',
+                                onPress: _isLoading ? () {} : _submit,
+                              ),
+                            ),
+                          )
+                        ],
                       ),
                     ),
                   ),
                 ),
-                if (_isLoading)
-                  Container(
-                    height: deviceHeight,
-                    color: MyApp.appSecondaryColor2.withOpacity(0.75),
-                  ),
-              ],
-            ),
+              ),
+              if (_isLoading)
+                Container(
+                  height: deviceHeight,
+                  color: MyApp.appSecondaryColor2.withOpacity(0.75),
+                ),
+            ],
           ),
         ),
       ),
