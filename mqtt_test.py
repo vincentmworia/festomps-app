@@ -10,6 +10,7 @@ from file_data import *
 
 def on_connect(client_conn, userdata, flags, rc, properties=None):
     publish_data('REQUEST INIT', 'true')
+    print('connection is successful')
 
 
 def on_publish(client_pub, userdata, mid, properties=None):

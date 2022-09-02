@@ -632,76 +632,78 @@ class _FestoMpsScreenState extends State<FestoMpsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-    elevation: 0,
-    title: Custom.titleText('FESTO MPS'),
-      ),
-      drawer: Provider.of<ActivateBn>(context, listen: false).bnStatus
-      ? null
-      : const CustomDrawer(),
-      body: StreamBuilder(
-      stream: mainStream.stream,
-      builder: (context, snap) {
-        if (snap.connectionState == ConnectionState.waiting) {
-          return Container(
-            color: MyApp.appSecondaryColor2.withOpacity(0.5),
-            child: const Center(
-                child: Text(
-              'Fetching\nserver\ndata...',
-              style: TextStyle(
-                  letterSpacing: 20.0, color: Colors.white, fontSize: 30.0),
-            )),
-          );
-        }
-        return Stack(
-          children: [
-            Column(
-              children: [
-                Container(
-                  color: MyApp.appPrimaryColor,
-                  height: 50,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      _topic('     ALL      ', 0),
-                      _topic('DISTRIBUTION', 1),
-                      _topic('  SORTING   ', 2),
-                    ],
+    return SafeArea(
+      child: Scaffold(
+        backgroundColor: Colors.white,
+        appBar: AppBar(
+      elevation: 0,
+      title: Custom.titleText('FESTO MPS'),
+        ),
+        drawer: Provider.of<ActivateBn>(context, listen: false).bnStatus
+        ? null
+        : const CustomDrawer(),
+        body: StreamBuilder(
+        stream: mainStream.stream,
+        builder: (context, snap) {
+          if (snap.connectionState == ConnectionState.waiting) {
+            return Container(
+              color: MyApp.appSecondaryColor2.withOpacity(0.5),
+              child: const Center(
+                  child: Text(
+                'Fetching\nserver\ndata...',
+                style: TextStyle(
+                    letterSpacing: 20.0, color: Colors.white, fontSize: 30.0),
+              )),
+            );
+          }
+          return Stack(
+            children: [
+              Column(
+                children: [
+                  Container(
+                    color: MyApp.appPrimaryColor,
+                    height: 50,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        _topic('     ALL      ', 0),
+                        _topic('DISTRIBUTION', 1),
+                        _topic('  SORTING   ', 2),
+                      ],
+                    ),
                   ),
-                ),
-                Expanded(
-                    child: LayoutBuilder(builder: (context, constraints) {
-                  return SingleChildScrollView(
-                    physics: const BouncingScrollPhysics(),
-                    scrollDirection: scrollDirection,
-                    controller: _controller,
-                    child: Column(children: [
-                      _stationDisplay(_all, constraints.maxHeight),
-                      _stationDisplay(_distribution, constraints.maxHeight),
-                      _stationDisplay(_sorting, constraints.maxHeight),
-                    ]),
-                  );
-                }))
-              ],
-            ),
-            if (snap.data as String == "terminated")
-              Container(
-                color: Colors.grey,
-                child: const Center(
-                    child: Text(
-                  'SERVER\nOFF',
-                  style: TextStyle(
-                      letterSpacing: 20.0,
-                      color: Colors.white,
-                      fontSize: 30.0),
-                )),
+                  Expanded(
+                      child: LayoutBuilder(builder: (context, constraints) {
+                    return SingleChildScrollView(
+                      physics: const BouncingScrollPhysics(),
+                      scrollDirection: scrollDirection,
+                      controller: _controller,
+                      child: Column(children: [
+                        _stationDisplay(_all, constraints.maxHeight),
+                        _stationDisplay(_distribution, constraints.maxHeight),
+                        _stationDisplay(_sorting, constraints.maxHeight),
+                      ]),
+                    );
+                  }))
+                ],
               ),
-          ],
-        );
-      }),
+              if (snap.data as String == "terminated")
+                Container(
+                  color: Colors.grey,
+                  child: const Center(
+                      child: Text(
+                    'SERVER\nOFF',
+                    style: TextStyle(
+                        letterSpacing: 20.0,
+                        color: Colors.white,
+                        fontSize: 30.0),
+                  )),
+                ),
+            ],
+          );
+        }),
+      ),
     );
   }
 }

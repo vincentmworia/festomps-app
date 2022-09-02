@@ -145,6 +145,7 @@ class _AdminAllowUsersState extends State<AdminAllowUsers> {
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     ElevatedButton(
+                        style: ElevatedButton.styleFrom(primary: MyApp.appSecondaryColor),
                         onPressed: () {
                           Navigator.pop(context);
                         },

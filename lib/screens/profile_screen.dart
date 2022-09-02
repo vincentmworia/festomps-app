@@ -1,5 +1,4 @@
 import 'package:festomps/providers/firebase_auth.dart';
-import 'package:festomps/screens/login_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
@@ -76,6 +75,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     ElevatedButton(
+                      style: ElevatedButton.styleFrom(primary: MyApp.appSecondaryColor),
                         onPressed: () {
                           Navigator.pop(context);
                         },
@@ -129,101 +129,103 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final User user = Provider.of<FirebaseUserData>(context).loggedInUser!;
     final deviceHeight =
         MediaQuery.of(context).size.height - MediaQuery.of(context).padding.top;
-    return Stack(
-      children: [
-    Scaffold(
-      key: scaffoldKey,
-      backgroundColor: Colors.white,
-      appBar: Custom.appBar(scaffoldKey, 'MY PROFILE'),
-      drawer: const CustomDrawer(),
-      body: Container(
-        margin: const EdgeInsets.all(15.0),
-        height: deviceHeight,
-        width: double.infinity,
-        child: LayoutBuilder(builder: (context, constraints) {
-          return Column(
-            children: <Widget>[
-              _container(
-                  borderRadius: borderRadius,
-                  width: constraints.maxWidth,
-                  height: constraints.maxHeight * 0.55,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: <Widget>[
-                      SizedBox(
-                          width: constraints.maxWidth,
-                          height: constraints.maxHeight * 0.15,
-                          child: CustomDrawer.circleAvatar(user)),
-                      Column(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: [
-                          Text(
-                            '${user.firstName} ${user.lastName}',
-                            style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 25.0),
-                          ),
-                          Custom.normalText(user.email),
-                        ],
-                      ),
-                      ElevatedButton.icon(
-                          style: ElevatedButton.styleFrom(
-                              minimumSize: bnSize,
-                              maximumSize: bnSize,
-                              padding: const EdgeInsets.all(10),
-                              elevation: 3,
-                              shape: RoundedRectangleBorder(
-                                  borderRadius:
-                                      BorderRadius.circular(20.0))),
-                          label: const Text('Edit Profile',
-                              style: TextStyle(
-                                  color: MyApp.appSecondaryColor,
+    return SafeArea(
+      child: Stack(
+        children: [
+      Scaffold(
+        key: scaffoldKey,
+        backgroundColor: Colors.white,
+        appBar: Custom.appBar(scaffoldKey, 'MY PROFILE'),
+        drawer: const CustomDrawer(),
+        body: Container(
+          margin: const EdgeInsets.all(15.0),
+          height: deviceHeight,
+          width: double.infinity,
+          child: LayoutBuilder(builder: (context, constraints) {
+            return Column(
+              children: <Widget>[
+                _container(
+                    borderRadius: borderRadius,
+                    width: constraints.maxWidth,
+                    height: constraints.maxHeight * 0.55,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: <Widget>[
+                        SizedBox(
+                            width: constraints.maxWidth,
+                            height: constraints.maxHeight * 0.15,
+                            child: CustomDrawer.circleAvatar(user)),
+                        Column(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            Text(
+                              '${user.firstName} ${user.lastName}',
+                              style: const TextStyle(
                                   fontWeight: FontWeight.bold,
-                                  fontSize: 25.0)),
-                          onPressed: () => _editProfileView(context, user),
-                          icon: Custom.icon(
-                              Icons.edit, MyApp.appSecondaryColor)),
-                      ElevatedButton.icon(
-                          style: ElevatedButton.styleFrom(
-                              minimumSize: bnSize,
-                              maximumSize: bnSize,
-                              padding: const EdgeInsets.all(10),
-                              elevation: 3,
-                              shape: RoundedRectangleBorder(
-                                  borderRadius:
-                                      BorderRadius.circular(20.0))),
-                          label: const Text('Delete User',
-                              style: TextStyle(
-                                  color: MyApp.appSecondaryColor,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 25.0)),
-                          onPressed: () => _deleteAccount(user),
-                          icon: Custom.icon(
-                              Icons.delete, MyApp.appSecondaryColor)),
-                    ],
-                  )),
-              _miniContainer(
-                  borderRadius: borderRadius,
-                  width: constraints.maxWidth,
-                  height: constraints.maxHeight * 0.12,
-                  child: Center(
-                      child: FittedBox(
-                    child: Custom.titleText(user.admin['admin'] == isAdmin
-                        ? 'ADMINISTRATOR'
-                        : 'NOT ADMIN'),
-                  ))),
-              _miniContainer(
-                  borderRadius: borderRadius,
-                  width: constraints.maxWidth,
-                  height: constraints.maxHeight * 0.12,
-                  child: const FingerprintEnableSwitch()),
-            ],
-          );
-        }),
+                                  fontSize: 25.0),
+                            ),
+                            Custom.normalText(user.email),
+                          ],
+                        ),
+                        ElevatedButton.icon(
+                            style: ElevatedButton.styleFrom(
+                                minimumSize: bnSize,
+                                maximumSize: bnSize,
+                                padding: const EdgeInsets.all(10),
+                                elevation: 3,
+                                shape: RoundedRectangleBorder(
+                                    borderRadius:
+                                        BorderRadius.circular(20.0))),
+                            label: const Text('Edit Profile',
+                                style: TextStyle(
+                                    color: MyApp.appSecondaryColor,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 25.0)),
+                            onPressed: () => _editProfileView(context, user),
+                            icon: Custom.icon(
+                                Icons.edit, MyApp.appSecondaryColor)),
+                        ElevatedButton.icon(
+                            style: ElevatedButton.styleFrom(
+                                minimumSize: bnSize,
+                                maximumSize: bnSize,
+                                padding: const EdgeInsets.all(10),
+                                elevation: 3,
+                                shape: RoundedRectangleBorder(
+                                    borderRadius:
+                                        BorderRadius.circular(20.0))),
+                            label: const Text('Delete User',
+                                style: TextStyle(
+                                    color: MyApp.appSecondaryColor,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 25.0)),
+                            onPressed: () => _deleteAccount(user),
+                            icon: Custom.icon(
+                                Icons.delete, MyApp.appSecondaryColor)),
+                      ],
+                    )),
+                _miniContainer(
+                    borderRadius: borderRadius,
+                    width: constraints.maxWidth,
+                    height: constraints.maxHeight * 0.12,
+                    child: Center(
+                        child: FittedBox(
+                      child: Custom.titleText(user.admin['admin'] == isAdmin
+                          ? 'ADMINISTRATOR'
+                          : 'NOT ADMIN'),
+                    ))),
+                _miniContainer(
+                    borderRadius: borderRadius,
+                    width: constraints.maxWidth,
+                    height: constraints.maxHeight * 0.12,
+                    child: const FingerprintEnableSwitch()),
+              ],
+            );
+          }),
+        ),
       ),
-    ),
-    if (_isLoading) Custom.containerLoading(deviceHeight),
-      ],
+      if (_isLoading) Custom.containerLoading(deviceHeight),
+        ],
+      ),
     );
   }
 }

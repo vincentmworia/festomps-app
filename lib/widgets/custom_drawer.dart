@@ -1,4 +1,3 @@
-import 'package:festomps/screens/mqtt_home_screen/stations_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -123,6 +122,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
                                       MainAxisAlignment.spaceEvenly,
                                   children: [
                                     ElevatedButton(
+                                        style: ElevatedButton.styleFrom(primary: MyApp.appSecondaryColor),
                                         onPressed: () {
                                           Navigator.pop(context);
                                         },

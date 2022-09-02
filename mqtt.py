@@ -34,6 +34,9 @@ def establish_opc_conn(port):
     client_conn = Client(url)
     client_conn.connect()
     client_conn.get_root_node()
+    # todo ser username and password for opcua connnection
+    # client_conn.set_user('Vincent Mworia')
+    # client_conn.set_password('mwendamworia')
     return client_conn
 
 
@@ -227,7 +230,7 @@ def on_message(client_msg, userdata, msg):
 
 # todo MQTT INITIALIZATION
 quality = 1
-update_time = 0.01
+update_time = 0.1
 
 
 # publish data
@@ -368,73 +371,78 @@ def stream_system_on_all():
 def stream_code_step_all():
     old_all_code_step = ''
     while True:
+
         code_step_number_1 = str(read_input_value(
             plc_client_1, dist_code_step_node_id))
         code_step_number_2 = str(read_input_value(
             plc_client_2, sort_code_step_node_id))
         new_all_code_step = (code_step_number_1 if int(code_step_number_1) <= 7
-                             else '1' + code_step_number_2)
-        new_all_code_step = (code_step_number_1 if int(code_step_number_1) <= 7
-                             else '1' + code_step_number_2)
+                             else '0' if int(
+            code_step_number_2) == 10 else '1' + code_step_number_2)
         if old_all_code_step != new_all_code_step:
+            print(new_all_code_step)
             publish_data("CODE STEP ALL", new_all_code_step)
             old_all_code_step = new_all_code_step
         time.sleep(update_time)
 
 
+initialization = True
 if __name__ == '__main__':
-    plc_client_1 = establish_opc_conn("6:10000")
-    print('OPCUA CONNECTION TO PLC1 IS SUCCESSFUL')
-    plc_client_2 = establish_opc_conn("5:20000")
-    print('OPCUA CONNECTION TO PLC2 IS SUCCESSFUL')
+    print('MAIN CODE ENTRY POINT')
+    if initialization:
+        plc_client_1 = establish_opc_conn("6:10000")
+        print('OPCUA CONNECTION TO PLC1 IS SUCCESSFUL')
+        plc_client_2 = establish_opc_conn("5:20000")
+        print('OPCUA CONNECTION TO PLC2 IS SUCCESSFUL')
 
-    # mqtt connection
-    client = paho.Client(client_id="VINCENT", userdata=None,
-                         protocol=paho.MQTTv5)
-    client.will_set(topic="REQUEST INIT", payload="terminated")
-    client.tls_set(tls_version=mqtt.client.ssl.PROTOCOL_TLS)
-    client.username_pw_set("Vincent Mworia", "mwendamworia")
-    client.connect("8a32997794c84b92a769a6a46bb1582f.s1.eu.hivemq.cloud", 8883)
+        # mqtt connection
+        client = paho.Client(client_id="VINCENT", userdata=None,
+                             protocol=paho.MQTTv5)
+        client.will_set(topic="REQUEST INIT", payload="terminated")
+        client.tls_set(tls_version=mqtt.client.ssl.PROTOCOL_TLS)
+        client.username_pw_set("Vincent Mworia", "mwendamworia")
+        client.connect("8a32997794c84b92a769a6a46bb1582f.s1.eu.hivemq.cloud", 8883)
 
-    client.on_connect = on_connect
-    client.on_subscribe = on_subscribe
-    client.on_message = on_message
-    client.on_publish = on_publish
+        client.on_connect = on_connect
+        client.on_subscribe = on_subscribe
+        client.on_message = on_message
+        client.on_publish = on_publish
 
-    thread_subscribe = threading.Thread(target=stream_subscription)
-    thread_dist_code_step = threading.Thread(target=stream_code_step_dist)
-    # thread_stream_init = threading.Thread(target=stream_init)
-    thread_dist_manual_step = threading.Thread(target=stream_manual_step_dist)
-    thread_dist_manual_auto_mode = threading.Thread(
-        target=stream_manual_auto_mode_dist)
-    thread_dist_system_on = threading.Thread(target=stream_system_on_dist)
+        thread_subscribe = threading.Thread(target=stream_subscription)
+        thread_dist_code_step = threading.Thread(target=stream_code_step_dist)
+        # thread_stream_init = threading.Thread(target=stream_init)
+        thread_dist_manual_step = threading.Thread(target=stream_manual_step_dist)
+        thread_dist_manual_auto_mode = threading.Thread(
+            target=stream_manual_auto_mode_dist)
+        thread_dist_system_on = threading.Thread(target=stream_system_on_dist)
 
-    thread_sort_code_step = threading.Thread(target=stream_code_step_sort)
-    thread_sort_manual_step = threading.Thread(target=stream_manual_step_sort)
-    thread_sort_manual_auto_mode = threading.Thread(
-        target=stream_manual_auto_mode_sort)
-    thread_sort_system_on = threading.Thread(
-        target=stream_system_on_sort)
-    # thread_sort_workpiece_number = threading.Thread(
-    #     target=stream_workpiece_number_sort)
+        thread_sort_code_step = threading.Thread(target=stream_code_step_sort)
+        thread_sort_manual_step = threading.Thread(target=stream_manual_step_sort)
+        thread_sort_manual_auto_mode = threading.Thread(
+            target=stream_manual_auto_mode_sort)
+        thread_sort_system_on = threading.Thread(
+            target=stream_system_on_sort)
+        # thread_sort_workpiece_number = threading.Thread(
+        #     target=stream_workpiece_number_sort)
 
-    thread_all_system_on = threading.Thread(target=stream_system_on_all)
-    thread_all_code_step = threading.Thread(target=stream_code_step_all)
+        thread_all_system_on = threading.Thread(target=stream_system_on_all)
+        thread_all_code_step = threading.Thread(target=stream_code_step_all)
 
-    thread_subscribe.start()
-    # thread_stream_init.start()
+        thread_subscribe.start()
+        # thread_stream_init.start()
 
-    thread_dist_code_step.start()
-    thread_dist_manual_step.start()
-    thread_dist_manual_auto_mode.start()
-    thread_dist_system_on.start()
+        thread_dist_code_step.start()
+        thread_dist_manual_step.start()
+        thread_dist_manual_auto_mode.start()
+        thread_dist_system_on.start()
 
-    thread_sort_code_step.start()
-    thread_sort_manual_step.start()
-    thread_sort_manual_auto_mode.start()
-    thread_sort_system_on.start()
-    # thread_sort_workpiece_number.start()
+        thread_sort_code_step.start()
+        thread_sort_manual_step.start()
+        thread_sort_manual_auto_mode.start()
+        thread_sort_system_on.start()
+        # thread_sort_workpiece_number.start()
 
-    thread_all_system_on.start()
-    thread_all_code_step.start()
-    print('THREADS INITIALIZATION SUCCESSFUL')
+        thread_all_system_on.start()
+        thread_all_code_step.start()
+        print('THREADS INITIALIZATION SUCCESSFUL')
+        initialization = False

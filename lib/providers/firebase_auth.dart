@@ -244,15 +244,4 @@ class FirebaseAuthenticationHandler with ChangeNotifier {
       Navigator.pushReplacementNamed(context, LoginScreen.routeName);
     });
   }
-
-// todo autoLogout
-//   static void _autoLogout(BuildContext context) {
-//     if (_authTimer != null) {
-//       _authTimer!.cancel(); // Cancels the previous timer and re-initializes it
-//     }
-//     print('init logout');
-//     final timeToExpiry = _expiresIn!.difference(DateTime.now()).inSeconds;
-//     _authTimer = Timer(
-//         Duration(seconds: timeToExpiry), () async => await logout(context));
-//   }
 }

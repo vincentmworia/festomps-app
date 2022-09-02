@@ -20,7 +20,7 @@ class AdminScreen extends StatefulWidget {
   static const routeName = '/admin_screen';
 
   static String formatDate(DateTime time) =>
-      DateFormat('dd/MM/yyyy HH:MM').format(time);
+      DateFormat('dd/MM/yyyy HH:mm:ss').format(time);
 
   @override
   State<AdminScreen> createState() => _AdminScreenState();
@@ -70,7 +70,6 @@ class _AdminScreenState extends State<AdminScreen> {
               body: json.encode({'admin': isAdmin}))
           .then((_) => setState(() => _isLoading = false));
     } else if (addUser == 4) {
-      // remove user admin
       await http
           .patch(
               Uri.parse(
@@ -105,94 +104,96 @@ class _AdminScreenState extends State<AdminScreen> {
     // final List<Admin> onlineUsersList = [];
     final List<Admin> otherUsersList = [];
     final List<Admin> allowUsersList = [];
-    return Scaffold(
-      key: scaffoldKey,
-      appBar: Custom.appBar(scaffoldKey, 'Admin'),
-      drawer: const CustomDrawer(),
-      body: _isLoading
-          ? Custom.containerLoading(deviceHeight)
-          : FutureBuilder(
-              future: _getUsersData(),
-              builder: (context, snap) {
-                if (snap.connectionState == ConnectionState.waiting) {
-                  return Custom.containerLoading(deviceHeight);
-                }
-                // i++;
-                otherUsersList.clear();
-                allowUsersList.clear();
-                // onlineUsersList.clear();
+    return SafeArea(
+      child: Scaffold(
+        key: scaffoldKey,
+        appBar: Custom.appBar(scaffoldKey, 'Admin'),
+        drawer: const CustomDrawer(),
+        body: _isLoading
+            ? Custom.containerLoading(deviceHeight)
+            : FutureBuilder(
+                future: _getUsersData(),
+                builder: (context, snap) {
+                  if (snap.connectionState == ConnectionState.waiting) {
+                    return Custom.containerLoading(deviceHeight);
+                  }
+                  // i++;
+                  otherUsersList.clear();
+                  allowUsersList.clear();
+                  // onlineUsersList.clear();
 
-                for (User user in snap.data as List<User>) {
-                  var loginData = [];
-                  final userLogins =
-                      (user.loginDetails as Map<String, dynamic>)
-                          .values
-                          .toList();
-                  userLogins.removeWhere((data) => data == true);
-                  for (Map<String, dynamic> logins in userLogins) {
-                    final loginTime = DateTime.parse(logins['login']);
-                    final logoutTime = DateTime.parse(logins['logout']);
-                    final loginDuration = logoutTime.difference(loginTime);
+                  for (User user in snap.data as List<User>) {
+                    var loginData = [];
+                    final userLogins =
+                        (user.loginDetails as Map<String, dynamic>)
+                            .values
+                            .toList();
+                    userLogins.removeWhere((data) => data == true);
+                    for (Map<String, dynamic> logins in userLogins) {
+                      final loginTime = DateTime.parse(logins['login']);
+                      final logoutTime = DateTime.parse(logins['logout']);
+                      final loginDuration = logoutTime.difference(loginTime);
 
-                    var timeInHrs = loginDuration.inHours.toString();
-                    var timeInMin = loginDuration.inMinutes.toString();
-                    var timeInSec = loginDuration.inSeconds.toString();
-                    var timeInMilliSec =
-                        loginDuration.inMilliseconds.toString();
+                      var timeInHrs = loginDuration.inHours.toString();
+                      var timeInMin = loginDuration.inMinutes.toString();
+                      var timeInSec = loginDuration.inSeconds.toString();
+                      var timeInMilliSec =
+                          loginDuration.inMilliseconds.toString();
 
-                    String? duration;
-                    if (timeInMin == '0' &&
-                        timeInHrs == '0' &&
-                        timeInSec == '0') {
-                      duration = '$timeInMilliSec mill';
-                    } else if (timeInMin == '0' && timeInHrs == '0') {
-                      duration = '$timeInSec sec';
-                    } else if (timeInHrs == '0') {
-                      duration = '$timeInMin min';
-                    } else {
-                      '$timeInHrs hrs $timeInMin min';
+                      String? duration;
+                      if (timeInMin == '0' &&
+                          timeInHrs == '0' &&
+                          timeInSec == '0') {
+                        duration = '$timeInMilliSec mill';
+                      } else if (timeInMin == '0' && timeInHrs == '0') {
+                        duration = '$timeInSec sec';
+                      } else if (timeInHrs == '0') {
+                        duration = '$timeInMin min';
+                      } else {
+                        '$timeInHrs hrs $timeInMin min';
+                      }
+
+                      loginData.add({
+                        'login': AdminScreen.formatDate(loginTime),
+                        'logout': AdminScreen.formatDate(logoutTime),
+                        'duration': duration,
+                      });
                     }
 
-                    loginData.add({
-                      'login': AdminScreen.formatDate(loginTime),
-                      'logout': AdminScreen.formatDate(logoutTime),
-                      'duration': duration,
-                    });
+                    final newUser = Admin(
+                        localId: user.localId,
+                        email: user.email,
+                        firstName: user.firstName,
+                        lastName: user.lastName,
+                        password: user.password,
+                        admin: user.admin['admin'] == isAdmin,
+                        allowedInApp:
+                            user.allowedInApp['allowedInApp'] == isAllowedInApp,
+                        online: user.online['online'] as bool,
+                        loginData: loginData);
+                    if (!newUser.allowedInApp) {
+                      allowUsersList.add(newUser);
+                    } else {
+                      otherUsersList.add(newUser);
+                    }
                   }
 
-                  final newUser = Admin(
-                      localId: user.localId,
-                      email: user.email,
-                      firstName: user.firstName,
-                      lastName: user.lastName,
-                      password: user.password,
-                      admin: user.admin['admin'] == isAdmin,
-                      allowedInApp:
-                          user.allowedInApp['allowedInApp'] == isAllowedInApp,
-                      online: user.online['online'] as bool,
-                      loginData: loginData);
-                  if (!newUser.allowedInApp) {
-                    allowUsersList.add(newUser);
-                  } else {
-                    otherUsersList.add(newUser);
-                  }
-                }
-
-                return SingleChildScrollView(
-                  child: SizedBox(
-                    height: deviceHeight * 0.9,
-                    child: Column(
-                      children: [
-                        if (allowUsersList.isNotEmpty)
-                          AdminAllowUsers(allowUsersList, _allowUser),
-                        Expanded(
-                            child:
-                                AdminOtherUsers(otherUsersList, _allowUser)),
-                      ],
+                  return SingleChildScrollView(
+                    child: SizedBox(
+                      height: deviceHeight * 0.9,
+                      child: Column(
+                        children: [
+                          if (allowUsersList.isNotEmpty)
+                            AdminAllowUsers(allowUsersList, _allowUser),
+                          Expanded(
+                              child:
+                                  AdminOtherUsers(otherUsersList, _allowUser)),
+                        ],
+                      ),
                     ),
-                  ),
-                );
-              }),
+                  );
+                }),
+      ),
     );
   }
 }
