@@ -14,7 +14,7 @@ import '../screens/login_screen.dart';
 
 class FirebaseAuthenticationHandler with ChangeNotifier {
   static String? _token;
-  static DateTime? _expiresIn;
+  // static DateTime? _expiresIn;
   static DateTime? _loginTime;
   static DateTime? _logoutTime;
 
@@ -126,8 +126,8 @@ class FirebaseAuthenticationHandler with ChangeNotifier {
     }
     SignInData signInData = SignInData.fromMap(responseData);
     _token = signInData.idToken;
-    _expiresIn =
-        DateTime.now().add(Duration(seconds: int.parse(signInData.expiresIn)));
+    // _expiresIn =
+    //     DateTime.now().add(Duration(seconds: int.parse(signInData.expiresIn)));
     final allUsers =
         await http.get(Uri.parse('$firebaseUrl/.json?auth=$token'));
     final allUsersData = json.decode(allUsers.body) as Map<String, dynamic>;
@@ -195,7 +195,7 @@ class FirebaseAuthenticationHandler with ChangeNotifier {
       message = getErrorMessage(responseData['error']['message']);
     } else {
       _token = responseData['idToken'];
-      _expiresIn = DateTime.now().add(Duration(seconds: int.parse("3600")));
+      // _expiresIn = DateTime.now().add(Duration(seconds: int.parse("3600")));
       message = "UPDATE SUCCESSFUL";
     }
     return message;
@@ -236,7 +236,7 @@ class FirebaseAuthenticationHandler with ChangeNotifier {
             body: json.encode(loginDetailsCurrent))
         .then((_) {
       _token = null;
-      _expiresIn = null;
+      // _expiresIn = null;
       _loginTime = null;
       _logoutTime = null;
 

@@ -1,4 +1,4 @@
-code_step:3
+code_step:1
 manual_step:5
 manual_auto_mode:true
 system_on:true

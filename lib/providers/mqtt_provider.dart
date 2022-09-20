@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mqtt_client/mqtt_server_client.dart';
 
-import '../screens/mqtt_home_screen/mqttfile.dart';
+import '../screens/mqtt_home_screen/mqtt_file.dart';
 
 class MqttProvider with ChangeNotifier {
   MQTTClientWrapper? _mqttProtocol;

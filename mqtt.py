@@ -30,7 +30,7 @@ sort_total_number_node_id = 'ns=3;s="PYTHON_COMM_2"."TOTAL NUMBER" '
 
 
 def establish_opc_conn(port):
-    url = "opc.tcp://192.168.0." + port
+    url = "opc.tcp://172.22.208." + port
     client_conn = Client(url)
     client_conn.connect()
     client_conn.get_root_node()

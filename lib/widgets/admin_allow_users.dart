@@ -1,8 +1,8 @@
-import 'package:festomps/models/admin.dart';
 import 'package:flutter/material.dart';
 
+import './custom_widgets.dart';
 import '../main.dart';
-import 'custom_widgets.dart';
+import '../models/admin.dart';
 
 class AdminAllowUsers extends StatefulWidget {
   const AdminAllowUsers(this.allowUsers, this.allowUser, {Key? key})

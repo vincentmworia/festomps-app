@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import './custom_widgets.dart';
 import '../main.dart';
 import '../private_data.dart';
 import '../providers/firebase_auth.dart';
@@ -10,7 +11,6 @@ import '../screens/about_screen.dart';
 import '../screens/mqtt_home_screen/mqtt_root_screen.dart';
 import '../screens/profile_screen.dart';
 import '../providers/firebase_user_data.dart';
-import './custom_widgets.dart';
 
 class CustomDrawer extends StatefulWidget {
   const CustomDrawer({Key? key}) : super(key: key);

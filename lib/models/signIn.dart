@@ -1,19 +1,13 @@
 class SignInData {
   final String localId;
   final String email;
-  // final String displayName;
   final String idToken;
-  // final String registered;
-  // final String refreshToken;
   final String expiresIn;
 
   SignInData({
     required this.localId,
     required this.email,
-    // required this.displayName,
     required this.idToken,
-    // required this.registered,
-    // required this.refreshToken,
     required this.expiresIn,
   });
 

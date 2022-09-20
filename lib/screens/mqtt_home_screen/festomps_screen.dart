@@ -1,19 +1,19 @@
 import 'dart:async';
 
-import 'package:festomps/private_data.dart';
-import 'package:festomps/providers/activate_button.dart';
-import 'package:festomps/providers/mqtt_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:mqtt_client/mqtt_client.dart';
 import 'package:provider/provider.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 
+import './image_view.dart';
+import './stepper_view.dart';
+import '../../private_data.dart';
+import '../../providers/activate_button.dart';
+import '../../providers/mqtt_provider.dart';
 import '../../enum.dart';
 import '../../main.dart';
 import '../../widgets/custom_drawer.dart';
 import '../../widgets/custom_widgets.dart';
-import 'image_view.dart';
-import 'stepper_view.dart';
 
 class FestoMpsScreen extends StatefulWidget {
   const FestoMpsScreen({Key? key}) : super(key: key);
@@ -264,7 +264,7 @@ class _FestoMpsScreenState extends State<FestoMpsScreen> {
         ),
       );
 
-  Widget _colorTitle(String title, Color clr) => Container(
+    Widget _colorTitle(String title, Color clr) => Container(
         decoration: BoxDecoration(color: clr, shape: BoxShape.circle),
         width: 45,
         height: 45,
@@ -300,6 +300,7 @@ class _FestoMpsScreenState extends State<FestoMpsScreen> {
               color: MyApp.appPrimaryColor,
             ),
             child: Center(
+              
                 child: Text(
               station == _distribution
                   ? '$title DIST'

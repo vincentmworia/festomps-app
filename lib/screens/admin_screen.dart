@@ -1,14 +1,14 @@
 import 'dart:async';
 
-import 'package:festomps/providers/firebase_auth.dart';
-import 'package:festomps/widgets/admin_allow_users.dart';
-import 'package:festomps/widgets/admin_other_users.dart';
-
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'dart:convert';
 
+import '../main.dart';
+import '../providers/firebase_auth.dart';
+import '../widgets/admin_allow_users.dart';
+import '../widgets/admin_other_users.dart';
 import '../models/admin.dart';
 import '../models/user.dart';
 import '../private_data.dart';
@@ -121,6 +121,22 @@ class _AdminScreenState extends State<AdminScreen> {
                   otherUsersList.clear();
                   allowUsersList.clear();
                   // onlineUsersList.clear();
+
+                  if (snap.data == null) {
+                    return Container(
+                      height: deviceHeight,
+                      color: MyApp.appPrimaryColor.withOpacity(0.75),
+                      child: const Center(
+                        child: Text(
+                          'OFFLINE',
+                          style: TextStyle(
+                              letterSpacing: 20.0,
+                              color: Colors.white,
+                              fontSize: 30.0),
+                        ),
+                      ),
+                    );
+                  }
 
                   for (User user in snap.data as List<User>) {
                     var loginData = [];

@@ -1,12 +1,12 @@
 import 'dart:convert';
 
-import 'package:festomps/providers/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../main.dart';
+import '../providers/firebase_auth.dart';
 import '../global_data.dart';
 import '../models/user.dart';
 import '../private_data.dart';
@@ -185,6 +185,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 ),
         ),
         body: SingleChildScrollView(
+          physics: const BouncingScrollPhysics(),
           child: SizedBox(
             height: deviceHeight,
             child: Stack(

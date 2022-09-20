@@ -1,10 +1,7 @@
-import 'dart:convert';
-
 import 'package:festomps/providers/activate_button.dart';
 import 'package:festomps/providers/firebase_auth.dart';
 import 'package:festomps/providers/mqtt_provider.dart';
 import 'package:festomps/screens/mqtt_home_screen/mqtt_root_screen.dart';
-import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -13,8 +10,6 @@ import './screens/login_screen.dart';
 import './screens/profile_screen.dart';
 import './screens/about_screen.dart';
 import './screens/admin_screen.dart';
-import 'private_data.dart';
-import 'widgets/custom_widgets.dart';
 
 void main() {
   runApp(const MyApp());

@@ -6,11 +6,11 @@ import 'package:festomps/screens/mqtt_home_screen/festomps_screen.dart'
 import 'package:flutter/material.dart';
 import 'package:mqtt_client/mqtt_server_client.dart';
 import 'package:provider/provider.dart';
+
+import './offline_screen.dart';
+import './mqtt_file.dart';
 import '../../main.dart';
 import '../../widgets/custom_widgets.dart';
-import './offline_screen.dart';
-
-import './mqttfile.dart';
 import '../../enum.dart';
 
 // todo connectivity checker all through the app where the connectivity check is required
@@ -84,6 +84,7 @@ class _MainHomeState extends State<MainHome> {
     });
   }
 
+
   @override
   void dispose() {
     super.dispose();
@@ -94,11 +95,13 @@ class _MainHomeState extends State<MainHome> {
 
   @override
   Widget build(BuildContext context) {
-    return connStatus == Status.offline
+    return
+      connStatus == Status.offline
         ? const OfflineScreen(
             title: 'OFFLINE',
             color: MyApp.appSecondaryColor2,
           )
-        : const festo.FestoMpsScreen();
+        :
+    const festo.FestoMpsScreen();
   }
 }

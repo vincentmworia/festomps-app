@@ -1,10 +1,10 @@
 
 import 'package:flutter/material.dart';
 
+import './custom_widgets.dart';
 import '../main.dart';
 import '../models/admin.dart';
 import '../screens/admin_user_screen.dart';
-import 'custom_widgets.dart';
 
 class AdminOtherUsers extends StatelessWidget {
   const AdminOtherUsers(this.otherUsers, this.allowUser, {Key? key})

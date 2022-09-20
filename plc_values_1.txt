@@ -1,4 +1,7 @@
-code_step:6
-manual_step:3
+code_step:3
+manual_step:2
 manual_auto_mode:false
 system_on:true
+start:false
+stop:false
+connectToMachine:false
