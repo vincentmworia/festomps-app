@@ -96,6 +96,12 @@ class _AdminScreenState extends State<AdminScreen> {
     // _searchController.dispose();
   }
 
+  Future<void> refresh() async {
+    await Future.delayed(Duration.zero).then((value) => setState(
+          () {},
+        ));
+  }
+
   @override
   Widget build(BuildContext context) {
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
@@ -107,7 +113,17 @@ class _AdminScreenState extends State<AdminScreen> {
     return SafeArea(
       child: Scaffold(
         key: scaffoldKey,
-        appBar: Custom.appBar(scaffoldKey, 'Admin'),
+        appBar: AppBar(
+          title: Custom.titleText('Admin'),
+          leading: IconButton(
+            icon: Custom.icon(Icons.menu, MyApp.appSecondaryColor),
+            onPressed: () => scaffoldKey.currentState?.openDrawer(),
+          ),
+          actions: [
+            IconButton(
+                onPressed: () => refresh(), icon: const Icon(Icons.refresh))
+          ],
+        ),
         drawer: const CustomDrawer(),
         body: _isLoading
             ? Custom.containerLoading(deviceHeight)
@@ -195,16 +211,20 @@ class _AdminScreenState extends State<AdminScreen> {
                   }
 
                   return SingleChildScrollView(
-                    child: SizedBox(
-                      height: deviceHeight * 0.9,
-                      child: Column(
-                        children: [
-                          if (allowUsersList.isNotEmpty)
-                            AdminAllowUsers(allowUsersList, _allowUser),
-                          Expanded(
-                              child:
-                                  AdminOtherUsers(otherUsersList, _allowUser)),
-                        ],
+                    child: RefreshIndicator(
+                      color: MyApp.appSecondaryColor,
+                      onRefresh: () => refresh(),
+                      child: SizedBox(
+                        height: deviceHeight * 0.9,
+                        child: Column(
+                          children: [
+                            if (allowUsersList.isNotEmpty)
+                              AdminAllowUsers(allowUsersList, _allowUser),
+                            Expanded(
+                                child: AdminOtherUsers(
+                                    otherUsersList, _allowUser)),
+                          ],
+                        ),
                       ),
                     ),
                   );
